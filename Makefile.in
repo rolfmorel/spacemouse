@@ -9,7 +9,7 @@ src:
 	cp $(addprefix src/, $(spacemouse_bins)) .
 
 .PHONY: install
-install: $(spacemouse_bins)
+install: $(spacemouse_bins) $(spacemouse_links)
 	install -D -m 755 $(spacemouse_bins) $(DESTDIR)$(PREFIX)/bin
 	cp -fd $(spacemouse_links) $(DESTDIR)$(PREFIX)/bin
 
