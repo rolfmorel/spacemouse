@@ -1,0 +1,9 @@
+spacemouse
+spacemouse-test
+
+spacemouse-list
+spacemouse-led
+spacemouse-event
+
+/Makefile
+/src/Makefile

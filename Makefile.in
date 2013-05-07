@@ -1,0 +1,31 @@
+spacemouse_bins = spacemouse spacemouse-test
+spacemouse_links = spacemouse-list spacemouse-led spacemouse-event
+
+all: src $(spacemouse_bins) $(spacemouse_links)
+
+.PHONY: src
+src:
+	@$(MAKE) -C src
+	cp $(addprefix src/, $(spacemouse_bins)) .
+
+.PHONY: install
+install: $(spacemouse_bins)
+	install -D -m 755 $(spacemouse_bins) $(DESTDIR)$(PREFIX)/bin
+	cp -fd $(spacemouse_links) $(DESTDIR)$(PREFIX)/bin
+
+spacemouse-%: spacemouse
+	ln -sf spacemouse $@
+
+.PHONY: uninstall
+uninstall:
+	rm -f $(addprefix $(DESTDIR)$(PREFIX)/bin/, $(spacemouse_bins))
+	rm -f $(addprefix $(DESTDIR)$(PREFIX)/bin/, $(spacemouse_links))
+
+.PHONY: clean
+clean:
+	@$(MAKE) -C src clean
+	rm -f $(spacemouse_bins) $(spacemouse_links)
+
+.PHONY: distclean
+distclean: clean
+	rm -f ./src/Makefile Makefile

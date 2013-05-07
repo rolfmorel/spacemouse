@@ -1,0 +1,84 @@
+#!/bin/sh
+
+echo 'configuring spacemouse-utils ...'
+
+PREFIX=/usr/local
+OPT=yes
+DBG=yes
+
+libdir=lib
+
+for arg; do
+    case "$arg" in
+    --prefix=*)
+        value=`echo $arg | sed 's/--prefix=//'`
+        PREFIX=${value:-$prefix}
+        ;;
+
+    --enable-opt)
+        OPT=yes;;
+    --disable-opt)
+        OPT=no;;
+
+    --enable-debug)
+        DBG=yes;;
+    --disable-debug)
+        DBG=no;;
+
+    --help)
+        echo 'usage: ./configure [options]'
+        echo 'options:'
+        echo '  --prefix=<path>: installation path (default: /usr/local)'
+        echo '  --enable-opt: enable compiler optimizations (default)'
+        echo '  --disable-opt: disable compiler optimizations'
+        echo '  --enable-debug: include debugging symbols (default)'
+        echo '  --disable-debug: do not include debugging symbols'
+        exit 0
+        ;;
+
+    esac
+done
+
+echo "  prefix: $PREFIX"
+echo "  compiler optimizations : $OPT"
+echo "  include debugging symbols: $DBG"
+if [ -n "$CFLAGS" ]; then
+    echo "  cflags: $CFLAGS"
+fi
+if [ -n "$LDFLAGS" ]; then
+    echo "  ldflags: $LDFLAGS"
+fi
+echo ""
+
+# create Makefile
+echo 'creating Makefiles ...'
+echo "PREFIX = $PREFIX" >Makefile
+echo "" >"./src/Makefile"
+
+echo "  ./Makefile"
+echo "  ./src/Makefile"
+
+echo "libdir = $libdir" >>Makefile
+
+if [ -n "$CFLAGS" ]; then
+    echo "user_cflags = $CFLAGS" >>./src/Makefile
+fi
+if [ -n "$LDFLAGS" ]; then
+    echo "user_ldflags = $LDFLAGS" >>./src/Makefile
+fi
+
+if [ "$DBG" = 'yes' ]; then
+    echo 'debug = -g' >>./src/Makefile
+fi
+
+if [ "$OPT" = 'yes' ]; then
+    echo 'opt = -O3' >>./src/Makefile
+fi
+
+cat "Makefile.in" >>Makefile
+cat "./src/Makefile.in" >>./src/Makefile
+
+#done
+echo ''
+echo 'Done. You can now type make (or gmake) to compile spacemouse-utils.'
+echo ''

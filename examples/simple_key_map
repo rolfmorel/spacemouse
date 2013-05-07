@@ -1,0 +1,73 @@
+#!/bin/bash
+
+spacemouse_event="spacemouse-event"
+if ! which spacemouse-event >/dev/null; then
+    if [[ -x '../spacemouse-event' ]]; then
+        spacemouse_event="../spacemouse-event"
+    else
+        echo "Cannot find 'spacemouse-event' in \$PATH or parent directory." >&2
+    fi
+fi
+
+button_pressed=(0 0)
+ignore_release=(0 0)
+${spacemouse_event} | {
+    while read EVENT; do
+        EVENT=$(echo ${EVENT} | sed -urn 's/(motion|button): //p')
+        case "$EVENT" in
+            'forward')
+                xdotool key Up;;
+
+            'back')
+                xdotool key Down;;
+
+            'right')
+                xdotool key Right;;
+
+            'left')
+                xdotool key Left;;
+
+            'pitch forward')
+                xdotool click 4;;
+
+            'pitch back')
+                xdotool click 5;;
+
+            'yaw right')
+                xdotool key ctrl+equal;;
+
+            'yaw left')
+                xdotool key ctrl+minus;;
+
+            '0 press')
+                if [[ ${button_pressed[1]} = 1 ]]; then
+                    xdotool getactivewindow windowkill
+                    ignore_release=(1 1)
+                fi
+                button_pressed[0]=1
+                ;;
+
+            '0 release')
+                if [[ ${ignore_release[0]} = 0 ]]; then
+                    spacemouse-led switch
+                fi
+                button_pressed[0]=0
+                ignore_release[0]=0
+                ;;
+
+            '1 press')
+                if [[ ${button_pressed[0]} = 1 ]]; then
+                    xdotool getactivewindow windowkill
+                    ignore_release=(1 1)
+                fi
+                button_pressed[1]=1
+                ;;
+
+            '1 release')
+                button_pressed[1]=0
+                ignore_release[1]=0
+                ;;
+
+        esac
+    done
+}
