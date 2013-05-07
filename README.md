@@ -9,9 +9,3 @@ Build
     ./configure
     make
     sudo make install
-
-Build examples
---------------
-
-    ./configure
-    make examples
