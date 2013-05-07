@@ -6,8 +6,6 @@ PREFIX=/usr/local
 OPT=yes
 DBG=yes
 
-libdir=lib
-
 for arg; do
     case "$arg" in
     --prefix=*)
@@ -57,8 +55,6 @@ echo "" >"./src/Makefile"
 
 echo "  ./Makefile"
 echo "  ./src/Makefile"
-
-echo "libdir = $libdir" >>Makefile
 
 if [ -n "$CFLAGS" ]; then
     echo "user_cflags = $CFLAGS" >>./src/Makefile
