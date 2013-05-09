@@ -315,9 +315,7 @@ int main(int argc, char **argv)
   if (command == EVENT_CMD)
     monitor_fd = spacemouse_monitor_open();
 
-  iter = spacemouse_devices_update();
-
-  while (iter) {
+  for (iter = spacemouse_devices_update(); iter; iter = iter->next) {
     int skip = 0;
     char const *opts[] = { dev_opt, man_opt, pro_opt };
     char const *members[] = { iter->devnode, iter->manufacturer,
@@ -383,8 +381,6 @@ int main(int argc, char **argv)
         spacemouse_device_close(iter);
       }
     }
-
-    iter = iter->next;
   }
 
   if (command != EVENT_CMD)
@@ -393,12 +389,9 @@ int main(int argc, char **argv)
   while(1) {
     int fds_idx = 0;
 
-    iter = spacemouse_devices();
-    while (iter) {
+    for (iter = spacemouse_devices_update(); iter; iter = iter->next)
       if (iter->fd > -1)
         fds_idx++;
-      iter = iter->next;
-    }
 
     struct pollfd fds[fds_idx + 1];
     fds_idx = 0;
@@ -409,119 +402,116 @@ int main(int argc, char **argv)
     fds[fds_idx].fd = monitor_fd;
     fds[fds_idx++].events = POLLIN;
 
-    iter = spacemouse_devices();
-    while (iter) {
+    for (iter = spacemouse_devices_update(); iter; iter = iter->next)
       if (iter->fd > -1) {
         fds[fds_idx].fd = iter->fd;
         fds[fds_idx++].events = POLLIN;
       }
-      iter = iter->next;
-    }
 
     poll(fds, fds_idx, -1);
 
     iter = spacemouse_devices();
 
     for (int n = 0; n < fds_idx; n++) {
-      if (fds[n].revents != 0) {
-        if (fds[n].fd == STDOUT_FILENO && fds[n].revents & POLLERR) {
-          exit(EXIT_ERROR);
+      if (fds[n].revents == 0)
+        continue;
 
-        } else if (fds[n].fd == monitor_fd) {
-          struct spacemouse *mon_mouse;
-          int action;
-          mon_mouse = spacemouse_monitor(&action);
+      if (fds[n].fd == STDOUT_FILENO && fds[n].revents & POLLERR) {
+        exit(EXIT_ERROR);
 
-          if (action == SPACEMOUSE_ACTION_ADD) {
-            int skip = 0;
-            char const *opts[] = { dev_opt, man_opt, pro_opt };
-            char const *members[] = { mon_mouse->devnode,
-                                      mon_mouse->manufacturer,
-                                      mon_mouse->product };
+      } else if (fds[n].fd == monitor_fd) {
+        struct spacemouse *mon_mouse;
+        int action;
+        mon_mouse = spacemouse_monitor(&action);
 
-            for (int i = 0; i < 3; i++) {
-              int regex_success;
-              if (opts[i] != NULL) {
-                regex_success = run_regex(opts[i], members[i], regex_mask);
-                if (regex_success == -1) {
-                  fprintf(stderr,
-                          "%s: failed to use regex for '%s' option: %s\n",
-                          *argv, long_options[i].name, opts[i]);
-                  exit(EXIT_FAILURE);
-                } else if (regex_success == 0)
-                  skip++;
-              }
+        if (action == SPACEMOUSE_ACTION_ADD) {
+          int skip = 0;
+          char const *opts[] = { dev_opt, man_opt, pro_opt };
+          char const *members[] = { mon_mouse->devnode,
+                                    mon_mouse->manufacturer,
+                                    mon_mouse->product };
+
+          for (int i = 0; i < 3; i++) {
+            int regex_success;
+            if (opts[i] != NULL) {
+              regex_success = run_regex(opts[i], members[i], regex_mask);
+              if (regex_success == -1) {
+                fprintf(stderr,
+                        "%s: failed to use regex for '%s' option: %s\n",
+                        *argv, long_options[i].name, opts[i]);
+                exit(EXIT_FAILURE);
+              } else if (regex_success == 0)
+                skip++;
             }
+          }
 
-            if (skip == 0 && spacemouse_device_open(mon_mouse) == -1) {
-              fprintf(stderr, "%s: failed to open device: %s", *argv,
-                      mon_mouse->devnode);
-              exit(EXIT_FAILURE);
-            }
-          } else if (action == SPACEMOUSE_ACTION_REMOVE)
-            spacemouse_device_close(mon_mouse);
+          if (skip == 0 && spacemouse_device_open(mon_mouse) == -1) {
+            fprintf(stderr, "%s: failed to open device: %s", *argv,
+                    mon_mouse->devnode);
+            exit(EXIT_FAILURE);
+          }
+        } else if (action == SPACEMOUSE_ACTION_REMOVE)
+          spacemouse_device_close(mon_mouse);
 
-        } else {
-          while (iter) {
-            if (iter->fd > -1 && fds[n].fd == iter->fd) {
-              int status;
+      } else {
+        for ( ; iter; iter = iter->next) {
+          if (iter->fd > -1 && fds[n].fd == iter->fd) {
+            int status;
 
-              memset(&mouse_event, 0, sizeof mouse_event);
+            memset(&mouse_event, 0, sizeof mouse_event);
 
-              status = spacemouse_device_read_event(iter, &mouse_event);
-              if (status == -1)
-                spacemouse_device_close(iter);
-              else if (status == SPACEMOUSE_READ_SUCCESS) {
-                if (mouse_event.type == SPACEMOUSE_EVENT_MOTION) {
-                  int *int_ptr = &mouse_event.motion.x;
-                  for (int i = 0; i < 6; i++) {
-                    int print_event = 0;
-                    struct axis_event *axis_map = 0, *axis_inverse_map;
+            status = spacemouse_device_read_event(iter, &mouse_event);
+            if (status == -1)
+              spacemouse_device_close(iter);
+            else if (status == SPACEMOUSE_READ_SUCCESS) {
+              if (mouse_event.type == SPACEMOUSE_EVENT_MOTION) {
+                int *int_ptr = &mouse_event.motion.x;
+                for (int i = 0; i < 6; i++) {
+                  int print_event = 0;
+                  struct axis_event *axis_map = 0, *axis_inverse_map;
 
-                    if (int_ptr[i] > min_deviation) {
-                      axis_map = axis_pos_map;
-                      axis_inverse_map = axis_neg_map;
-                    } else if (int_ptr[i] < (-1 * min_deviation)) {
-                      axis_map = axis_neg_map;
-                      axis_inverse_map = axis_pos_map;
+                  if (int_ptr[i] > min_deviation) {
+                    axis_map = axis_pos_map;
+                    axis_inverse_map = axis_neg_map;
+                  } else if (int_ptr[i] < (-1 * min_deviation)) {
+                    axis_map = axis_neg_map;
+                    axis_inverse_map = axis_pos_map;
+                  } else {
+                    axis_pos_map[i].n_events = 0;
+                    axis_neg_map[i].n_events = 0;
+                    axis_pos_map[i].millis = 0;
+                    axis_neg_map[i].millis = 0;
+                  }
+
+                  if (axis_map != 0) {
+                    if (millis_period != 0) {
+                      axis_map[i].millis += mouse_event.motion.period;
+                      if (axis_map[i].millis > millis_period) {
+                        axis_map[i].millis = \
+                            axis_map[i].millis % millis_period;
+                        print_event = 1;
+                      }
+
                     } else {
-                      axis_pos_map[i].n_events = 0;
-                      axis_neg_map[i].n_events = 0;
-                      axis_pos_map[i].millis = 0;
-                      axis_neg_map[i].millis = 0;
+                      axis_map[i].n_events += 1;
+                      axis_inverse_map[i].n_events = 0;
+                      if ((axis_map[i].n_events % n_events) == 0)
+                        print_event = 1;
                     }
 
-                    if (axis_map != 0) {
-                      if (millis_period != 0) {
-                        axis_map[i].millis += mouse_event.motion.period;
-                        if (axis_map[i].millis > millis_period) {
-                          axis_map[i].millis = \
-                              axis_map[i].millis % millis_period;
-                          print_event = 1;
-                        }
-
-                      } else {
-                        axis_map[i].n_events += 1;
-                        axis_inverse_map[i].n_events = 0;
-                        if ((axis_map[i].n_events % n_events) == 0)
-                          print_event = 1;
-                      }
-
-                      if (print_event) {
-                        printf("motion: %s\n", axis_map[i].event_str);
-                        fflush(stdout);
-                      }
+                    if (print_event) {
+                      printf("motion: %s\n", axis_map[i].event_str);
+                      fflush(stdout);
                     }
                   }
-                } else if (mouse_event.type == SPACEMOUSE_EVENT_BUTTON) {
-                  printf("button: %d %s \n", mouse_event.button.bnum,
-                         mouse_event.button.press ? "press" : "release");
-                  fflush(stdout);
                 }
+              } else if (mouse_event.type == SPACEMOUSE_EVENT_BUTTON) {
+                printf("button: %d %s \n", mouse_event.button.bnum,
+                       mouse_event.button.press ? "press" : "release");
+                fflush(stdout);
               }
             }
-
-            iter = iter->next;
+          break;
           }
         }
       }
