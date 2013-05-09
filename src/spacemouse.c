@@ -448,13 +448,27 @@ int main(int argc, char **argv)
             }
           }
 
-          if (skip == 0 && spacemouse_device_open(mon_mouse) == -1) {
-            fprintf(stderr, "%s: failed to open device: %s", *argv,
-                    mon_mouse->devnode);
-            exit(EXIT_FAILURE);
+          if (skip == 0) {
+            if (spacemouse_device_open(mon_mouse) == -1) {
+              fprintf(stderr, "%s: failed to open device: %s", *argv,
+                      mon_mouse->devnode);
+              exit(EXIT_FAILURE);
+            }
+
+            printf("device: %d %s %s %s connect\n", mon_mouse->id,
+                   mon_mouse->devnode, mon_mouse->manufacturer,
+                   mon_mouse->product);
+            fflush(stdout);
           }
-        } else if (action == SPACEMOUSE_ACTION_REMOVE)
+        } else if (action == SPACEMOUSE_ACTION_REMOVE) {
+          if (mon_mouse->id > -1) {
+            printf("device: %d %s %s %s disconnect\n", mon_mouse->id,
+                   mon_mouse->devnode, mon_mouse->manufacturer,
+                   mon_mouse->product);
+            fflush(stdout);
+          }
           spacemouse_device_close(mon_mouse);
+        }
 
       } else {
         for ( ; iter; iter = iter->next) {
