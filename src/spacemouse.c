@@ -53,6 +53,9 @@ struct axis_event {
   char const * const event_str;
 };
 
+/* strings based on use of AXIS_MAP_SPACENAVD macro during libspacemouse
+ * compilation
+ */
 struct axis_event axis_pos_map[] = { { 0, 0, "right" },
                                      { 0, 0, "up" },
                                      { 0, 0, "forward" },
