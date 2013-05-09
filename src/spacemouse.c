@@ -389,7 +389,7 @@ int main(int argc, char **argv)
   while(1) {
     int fds_idx = 0;
 
-    for (iter = spacemouse_devices_update(); iter; iter = iter->next)
+    for (iter = spacemouse_devices(); iter; iter = iter->next)
       if (iter->fd > -1)
         fds_idx++;
 
@@ -402,7 +402,7 @@ int main(int argc, char **argv)
     fds[fds_idx].fd = monitor_fd;
     fds[fds_idx++].events = POLLIN;
 
-    for (iter = spacemouse_devices_update(); iter; iter = iter->next)
+    for (iter = spacemouse_devices(); iter; iter = iter->next)
       if (iter->fd > -1) {
         fds[fds_idx].fd = iter->fd;
         fds[fds_idx++].events = POLLIN;
