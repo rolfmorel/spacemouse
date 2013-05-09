@@ -355,7 +355,7 @@ int main(int argc, char **argv)
         if (state_arg == -1 || state_arg == 2) {
           led_state = spacemouse_device_get_led(iter);
           if (led_state == -1) {
-            fprintf(stderr, "%s: failed to get led state_arg for: %s\n", *argv,
+            fprintf(stderr, "%s: failed to get led state for: %s\n", *argv,
                     iter->devnode);
             exit(EXIT_FAILURE);
           }
@@ -370,7 +370,7 @@ int main(int argc, char **argv)
           if (state_arg == 2)
             state = !led_state;
           if (spacemouse_device_set_led(iter, state) != 0) {
-            fprintf(stderr, "%s: failed to set led state_arg for: %s", *argv,
+            fprintf(stderr, "%s: failed to set led state for: %s", *argv,
                     iter->devnode);
             exit(EXIT_FAILURE);
           }
