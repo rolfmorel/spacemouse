@@ -1,4 +1,5 @@
-# spacemouse-utils: A collection of simple utilies for 3D/6DoF input devices.
+# spacemouse-utils
+A collection of simple utilies for 3D/6DoF input devices
 
 Simple programs for:
 * retrieving information about connected devices
@@ -17,12 +18,16 @@ Simple programs for:
     manufacturer: 3Dconnexion
     product: SpaceExplorer
 
+- - - - -
     $ spacemouse-led
     /dev/input/event4: off
     /dev/input/event0: off
+- - - - -
     $ spacemouse-led on
+- - - - -
     $ spacemouse-led -d /dev/input/event4 switch
     /dev/input/event4: switched off
+- - - - -
     $ spacemouse-event
     motion: forward
     motion: forward
@@ -38,6 +43,7 @@ Simple programs for:
     button: 0 press
     button: 0 release
     ...
+- - - - -
     $ spacemouse-test
     device id: 1
       devnode: /dev/input/event4
@@ -66,19 +72,36 @@ Simple programs for:
 
 ### Dependencies
 
-* libspacemouse
+* [libspacemouse](https://github.com/polyphemus/libspacemouse)
+
+### Compile and install
 
     ./configure
     make
     sudo make install
 
+### Uninstall
+
+after at least `./configure` has run
+
+    sudo make uninstall
+
 ## Examples
 
-* cli examples:
-  some examples of how the different programs can be used, including selecting devices, led switching in a loop and filtering of events
+* cli examples:<br>
+    some examples of how the different programs can be used, including selecting devices, led switching in a loop and filtering of events
 
-* simple led deamon:
-  simple script for turning the LED on on device connect
+* simple led deamon:<br>
+    simple script for turning the LED on on device connect
 
-* simple key map:
-  script for mapping events to keys with xdotool, for example: scrolling, zooming and killing applications
+* simple key map:<br>
+    script for mapping events to keys with xdotool, for example: scrolling, zooming and killing applications
+
+## Implementation
+
+The `spacemouse-list`, `spacemouse-led` and `spacemouse-event` programs are actually symbolic links to the multi-call `spacemouse` binary.
+
+The `spacemouse` program can also be called directly and use a command argument to specify which operations it should undertake: `list`, `led` and `event`. These commands take the same arguments as there symbolic link counter parts. When the `spacemouse` program is called without a command it defaults to the `list` command.
+
+Use `-h`/`--help` for more information on the options the spacemouse program and it's symbolic links take.
+
