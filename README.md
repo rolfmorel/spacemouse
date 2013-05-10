@@ -8,27 +8,21 @@ Simple programs for:
 
 ## Run
 
-```
-$ spacemouse-list
-devnode: /dev/input/event4
-manufacturer: 3Dconnexion
-product: SpaceNavigator
+    $ spacemouse-list
+    devnode: /dev/input/event4
+    manufacturer: 3Dconnexion
+    product: SpaceNavigator
 
-devnode: /dev/input/event0
-manufacturer: 3Dconnexion
-product: SpaceExplorer
-
-```
+    devnode: /dev/input/event0
+    manufacturer: 3Dconnexion
+    product: SpaceExplorer
 
     $ spacemouse-led
     /dev/input/event4: off
     /dev/input/event0: off
-
     $ spacemouse-led on
-
     $ spacemouse-led -d /dev/input/event4 switch
     /dev/input/event4: switched off
-
     $ spacemouse-event
     motion: forward
     motion: forward
@@ -44,7 +38,6 @@ product: SpaceExplorer
     button: 0 press
     button: 0 release
     ...
-
     $ spacemouse-test
     device id: 1
       devnode: /dev/input/event4
