@@ -2,7 +2,7 @@
 
 set -v
 
-export PATH="$(realpath ..):$PATH"
+export PATH="$( cd "$( dirname "$( dirname "$0" )" )" && pwd ):$PATH"
 
 # list all devices
 spacemouse-list
