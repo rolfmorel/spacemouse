@@ -1,13 +1,6 @@
 #!/bin/bash
 
-spacemouse_event="spacemouse-event"
-if ! which spacemouse-event >/dev/null; then
-    if [[ -x '../spacemouse-event' ]]; then
-        spacemouse_event="../spacemouse-event"
-    else
-        echo "Cannot find 'spacemouse-event' in \$PATH or parent directory." >&2
-    fi
-fi
+export PATH="$(realpath ..):$PATH"
 
 button_pressed=(0 0)
 ignore_release=(0 0)

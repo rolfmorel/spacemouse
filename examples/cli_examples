@@ -2,6 +2,8 @@
 
 set -v
 
+export PATH="$(realpath ..):$PATH"
+
 # list all devices
 spacemouse-list
 

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export PATH="$(realpath ..):$PATH"
+
 spacemouse-event | {
     while read EVENT; do
         if ! grep -q 'device: ' <<<"${EVENT}"; then
