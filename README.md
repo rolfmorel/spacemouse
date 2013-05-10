@@ -1,10 +1,10 @@
 # spacemouse-utils
-A collection of simple utilies for 3D/6DoF input devices
+A collection of simple utilies for 3D/6DoF input devices.
 
 Simple programs for:
-* retrieving information about connected devices
-* retrieving and setting/switching the LED state of connected devices
-* recieving events on connected devices (device, motion and button events)
+* retrieving information about connected 6DoF devices
+* retrieving and setting/switching the LED state of connected 6DoF devices
+* recieving events on connected 6DoF devices (device, motion and button events)
 * testing/debugging (of libspacemouse)
 
 ## Run
@@ -103,5 +103,5 @@ The `spacemouse-list`, `spacemouse-led` and `spacemouse-event` programs are actu
 
 The `spacemouse` program can also be called directly and use a command argument to specify which operations it should undertake: `list`, `led` and `event`. These commands take the same arguments as there symbolic link counter parts. When the `spacemouse` program is called without a command it defaults to the `list` command.
 
-Use `-h`/`--help` for more information on the options the spacemouse program and it's symbolic links take.
+Use `-h/--help` for more information on the options and arguments the spacemouse program and it's symbolic links take.
 
