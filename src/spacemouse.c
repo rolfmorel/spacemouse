@@ -537,7 +537,7 @@ int main(int argc, char **argv)
                   }
                 }
               } else if (mouse_event.type == SPACEMOUSE_EVENT_BUTTON) {
-                printf("button: %d %s \n", mouse_event.button.bnum,
+                printf("button: %d %s\n", mouse_event.button.bnum,
                        mouse_event.button.press ? "press" : "release");
                 fflush(stdout);
               }
