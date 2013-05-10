@@ -471,16 +471,14 @@ int main(int argc, char **argv)
               exit(EXIT_FAILURE);
             }
 
-            printf("device: %d %s %s %s connect\n", mon_mouse->id,
-                   mon_mouse->devnode, mon_mouse->manufacturer,
-                   mon_mouse->product);
+            printf("device: %s %s %s connect\n", mon_mouse->devnode,
+                   mon_mouse->manufacturer, mon_mouse->product);
             fflush(stdout);
           }
         } else if (action == SPACEMOUSE_ACTION_REMOVE) {
           if (mon_mouse->id > -1) {
-            printf("device: %d %s %s %s disconnect\n", mon_mouse->id,
-                   mon_mouse->devnode, mon_mouse->manufacturer,
-                   mon_mouse->product);
+            printf("device: %s %s %s disconnect\n", mon_mouse->devnode,
+                   mon_mouse->manufacturer, mon_mouse->product);
             fflush(stdout);
           }
           spacemouse_device_close(mon_mouse);
