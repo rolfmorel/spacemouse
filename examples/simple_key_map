@@ -4,7 +4,7 @@ export PATH="$(realpath ..):$PATH"
 
 button_pressed=(0 0)
 ignore_release=(0 0)
-${spacemouse_event} | {
+spacemouse-event | {
     while read EVENT; do
         EVENT=$(echo ${EVENT} | sed -urn 's/(motion|button): //p')
         case "$EVENT" in
