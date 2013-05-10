@@ -5,7 +5,7 @@ spacemouse-event | {
         if ! grep -q 'device: ' <<<"${EVENT}"; then
             continue
         fi
-        device=$(sed -urn 's/device: ([^ ]*?) .*/\1/p' <<<"${EVENT}")
+        device=$(sed -rn 's/device: ([^ ]*?) .*/\1/p' <<<"${EVENT}")
         if ! grep -q 'disconnect'<<<"${EVENT}"; then
             echo "spacemouse-led -d ${device} on"
             spacemouse-led -d "${device}" on
