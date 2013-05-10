@@ -286,33 +286,49 @@ int main(int argc, char **argv)
   } else if (n_events == 0)
     n_events = N_EVENTS;
 
-  if (command == LED_CMD) {
+  {
+    int invalid = 0;
     if (optind == (argc - 1)) {
-      char *ptr;
-      for (ptr = argv[optind]; *ptr != 0; ptr++)
-        *ptr = tolower(*ptr);
+      if (command == LED_CMD) {
+        char *ptr;
+        for (ptr = argv[optind]; *ptr != 0; ptr++)
+          *ptr = tolower(*ptr);
 
-      if (strcmp(argv[optind], "on") == 0 || strcmp(argv[optind], "1") == 0)
-        state_arg = 1;
-      else if (strcmp(argv[optind], "off") == 0 ||
-               strcmp(argv[optind], "0") == 0)
-        state_arg = 0;
-      else if (strcmp(argv[optind], "switch") == 0)
-        state_arg = 2;
-      else {
-        fprintf(stderr,
-                "%s: invalid non-option argument, see -h for help: %s\n",
-                *argv, argv[optind]);
-        exit(EXIT_FAILURE);
-      }
-    } else if (optind < (argc)) {
-      fprintf(stderr, "%s: expected zero or one non-option arguments, see -h "
-              "for help\n", *argv);
+        if (strcmp(argv[optind], "on") == 0 || strcmp(argv[optind], "1") == 0)
+          state_arg = 1;
+        else if (strcmp(argv[optind], "off") == 0 ||
+                 strcmp(argv[optind], "0") == 0)
+          state_arg = 0;
+        else if (strcmp(argv[optind], "switch") == 0)
+          state_arg = 2;
+        else
+          invalid = 3;
+      } else if (command == NO_CMD)
+        invalid = 4;
+      else
+        invalid = 1;
+    } else if (optind != argc) {
+      if (command == LED_CMD || command == NO_CMD)
+        invalid = 2;
+      else
+        invalid = 1;
+    }
+
+    if (invalid > 0) {
+      if (invalid == 1)
+        fprintf(stderr, "%s: does not take non-option arguments\n", *argv);
+      else if (invalid == 2)
+        fprintf(stderr, "%s: expected zero or one non-option arguments, see "
+                "'-h' for help\n", *argv);
+      else if (invalid == 3)
+        fprintf(stderr, "%s: invalid non-option argument -- '%s', see '-h' "
+                "for help\n", *argv, argv[optind]);
+      else if (invalid == 4)
+        fprintf(stderr, "%s: invalid command argument -- '%s', see '-h' for "
+                "help\n", *argv, argv[optind]);
+
       exit(EXIT_FAILURE);
     }
-  } else if (optind != argc) {
-    fprintf(stderr, "%s: does not take non-option arguments\n", *argv);
-    exit(EXIT_FAILURE);
   }
 
   if (command == EVENT_CMD)
