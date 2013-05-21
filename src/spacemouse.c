@@ -321,10 +321,10 @@ int main(int argc, char **argv)
         fprintf(stderr, "%s: expected zero or one non-option arguments, see "
                 "'-h' for help\n", *argv);
       else if (invalid == 3)
-        fprintf(stderr, "%s: invalid non-option argument -- '%s', see '-h' "
+        fprintf(stderr, "%s: invalid non-option argument -- %s, see '-h' "
                 "for help\n", *argv, argv[optind]);
       else if (invalid == 4)
-        fprintf(stderr, "%s: invalid command argument -- '%s', see '-h' for "
+        fprintf(stderr, "%s: invalid command argument -- %s, see '-h' for "
                 "help\n", *argv, argv[optind]);
 
       exit(EXIT_FAILURE);
@@ -344,7 +344,7 @@ int main(int argc, char **argv)
       if (opts[n] != NULL) {
         int regex_success = run_regex(opts[n], members[n], regex_mask);
         if (regex_success == -1) {
-          fprintf(stderr, "%s: failed to use regex for '%s' option: %s\n",
+          fprintf(stderr, "%s: failed to use regex for '%s' option -- %s\n",
                   *argv, long_options[n].name, opts[n]);
           exit(EXIT_FAILURE);
         } else if (regex_success == 1)
@@ -456,7 +456,7 @@ int main(int argc, char **argv)
               regex_success = run_regex(opts[i], members[i], regex_mask);
               if (regex_success == -1) {
                 fprintf(stderr,
-                        "%s: failed to use regex for '%s' option: %s\n",
+                        "%s: failed to use regex for '%s' option -- %s\n",
                         *argv, long_options[i].name, opts[i]);
                 exit(EXIT_FAILURE);
               } else if (regex_success == 0)
