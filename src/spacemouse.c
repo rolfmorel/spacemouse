@@ -364,7 +364,7 @@ int main(int argc, char **argv)
         fflush(stdout);
 
       } else if (spacemouse_device_open(iter) == -1) {
-        fprintf(stderr, "%s: failed to open device: %s", *argv, iter->devnode);
+        fprintf(stderr, "%s: failed to open device: %s\n", *argv, iter->devnode);
         exit(EXIT_FAILURE);
       }
 
@@ -387,7 +387,7 @@ int main(int argc, char **argv)
           if (state_arg == 2)
             state = !led_state;
           if (spacemouse_device_set_led(iter, state) != 0) {
-            fprintf(stderr, "%s: failed to set led state for: %s", *argv,
+            fprintf(stderr, "%s: failed to set led state for: %s\n", *argv,
                     iter->devnode);
             exit(EXIT_FAILURE);
           }
@@ -466,7 +466,7 @@ int main(int argc, char **argv)
 
           if (skip == 0) {
             if (spacemouse_device_open(mon_mouse) == -1) {
-              fprintf(stderr, "%s: failed to open device: %s", *argv,
+              fprintf(stderr, "%s: failed to open device: %s\n", *argv,
                       mon_mouse->devnode);
               exit(EXIT_FAILURE);
             }
