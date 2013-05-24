@@ -334,11 +334,12 @@ int main(int argc, char **argv)
   if (command == EVENT_CMD)
     monitor_fd = spacemouse_monitor_open();
 
-  for (iter = spacemouse_devices_update(); iter; iter = iter->next) {
+  spacemouse_device_list_foreach(iter, spacemouse_device_list_update()) {
     int skip = 0;
     char const *opts[] = { dev_opt, man_opt, pro_opt };
-    char const *members[] = { iter->devnode, iter->manufacturer,
-                              iter->product };
+    char const *members[] = { spacemouse_device_get_devnode(iter),
+                              spacemouse_device_get_manufacturer(iter),
+                              spacemouse_device_get_product(iter) };
 
     for (int n = 0; n < 3; n++) {
       if (opts[n] != NULL) {
@@ -360,11 +361,14 @@ int main(int argc, char **argv)
                "manufacturer: %s\n"
                "product: %s\n"
                "\n",
-               iter->devnode, iter->manufacturer, iter->product);
+               spacemouse_device_get_devnode(iter),
+               spacemouse_device_get_manufacturer(iter),
+               spacemouse_device_get_product(iter));
         fflush(stdout);
 
       } else if (spacemouse_device_open(iter) == -1) {
-        fprintf(stderr, "%s: failed to open device: %s\n", *argv, iter->devnode);
+        fprintf(stderr, "%s: failed to open device: %s\n", *argv,
+                spacemouse_device_get_devnode(iter));
         exit(EXIT_FAILURE);
       }
 
@@ -373,13 +377,14 @@ int main(int argc, char **argv)
           led_state = spacemouse_device_get_led(iter);
           if (led_state == -1) {
             fprintf(stderr, "%s: failed to get led state for: %s\n", *argv,
-                    iter->devnode);
+                    spacemouse_device_get_devnode(iter));
             exit(EXIT_FAILURE);
           }
         }
 
         if (state_arg == -1) {
-          printf("%s: %s\n", iter->devnode, led_state ? "on": "off");
+          printf("%s: %s\n", spacemouse_device_get_devnode(iter),
+                 led_state ? "on": "off");
           fflush(stdout);
         } else {
           int state = state_arg;
@@ -388,11 +393,12 @@ int main(int argc, char **argv)
             state = !led_state;
           if (spacemouse_device_set_led(iter, state) != 0) {
             fprintf(stderr, "%s: failed to set led state for: %s\n", *argv,
-                    iter->devnode);
+                    spacemouse_device_get_devnode(iter));
             exit(EXIT_FAILURE);
           }
           if (state_arg == 2) {
-            printf("%s: switched %s\n", iter->devnode, state ? "on": "off");
+            printf("%s: switched %s\n", spacemouse_device_get_devnode(iter),
+                   state ? "on": "off");
             fflush(stdout);
           }
         }
@@ -406,10 +412,10 @@ int main(int argc, char **argv)
     exit(EXIT_SUCCESS);
 
   while(1) {
-    int fds_idx = 0;
+    int mouse_fd, fds_idx = 0;
 
-    for (iter = spacemouse_devices(); iter; iter = iter->next)
-      if (iter->fd > -1)
+    spacemouse_device_list_foreach(iter, spacemouse_device_list())
+      if (spacemouse_device_get_fd(iter) > -1)
         fds_idx++;
 
     struct pollfd fds[fds_idx + 1];
@@ -421,15 +427,15 @@ int main(int argc, char **argv)
     fds[fds_idx].fd = monitor_fd;
     fds[fds_idx++].events = POLLIN;
 
-    for (iter = spacemouse_devices(); iter; iter = iter->next)
-      if (iter->fd > -1) {
-        fds[fds_idx].fd = iter->fd;
+    spacemouse_device_list_foreach(iter, spacemouse_device_list())
+      if ((mouse_fd = spacemouse_device_get_fd(iter)) > -1) {
+        fds[fds_idx].fd = mouse_fd;
         fds[fds_idx++].events = POLLIN;
       }
 
     poll(fds, fds_idx, -1);
 
-    iter = spacemouse_devices();
+    iter = spacemouse_device_list();
 
     for (int n = 0; n < fds_idx; n++) {
       if (fds[n].revents == 0)
@@ -446,9 +452,9 @@ int main(int argc, char **argv)
         if (action == SPACEMOUSE_ACTION_ADD) {
           int skip = 0;
           char const *opts[] = { dev_opt, man_opt, pro_opt };
-          char const *members[] = { mon_mouse->devnode,
-                                    mon_mouse->manufacturer,
-                                    mon_mouse->product };
+          char const *members[] = { spacemouse_device_get_devnode(mon_mouse),
+              spacemouse_device_get_manufacturer(mon_mouse),
+              spacemouse_device_get_product(mon_mouse) };
 
           for (int i = 0; i < 3; i++) {
             int regex_success;
@@ -467,26 +473,31 @@ int main(int argc, char **argv)
           if (skip == 0) {
             if (spacemouse_device_open(mon_mouse) == -1) {
               fprintf(stderr, "%s: failed to open device: %s\n", *argv,
-                      mon_mouse->devnode);
+                      spacemouse_device_get_devnode(mon_mouse));
               exit(EXIT_FAILURE);
             }
 
-            printf("device: %s %s %s connect\n", mon_mouse->devnode,
-                   mon_mouse->manufacturer, mon_mouse->product);
+            printf("device: %s %s %s connect\n",
+                   spacemouse_device_get_devnode(mon_mouse),
+                   spacemouse_device_get_manufacturer(mon_mouse),
+                   spacemouse_device_get_product(mon_mouse));
             fflush(stdout);
           }
         } else if (action == SPACEMOUSE_ACTION_REMOVE) {
-          if (mon_mouse->id > -1) {
-            printf("device: %s %s %s disconnect\n", mon_mouse->devnode,
-                   mon_mouse->manufacturer, mon_mouse->product);
+          if (spacemouse_device_get_fd(mon_mouse) > -1) {
+            printf("device: %s %s %s disconnect\n",
+                   spacemouse_device_get_devnode(mon_mouse),
+                   spacemouse_device_get_manufacturer(mon_mouse),
+                   spacemouse_device_get_product(mon_mouse));
             fflush(stdout);
           }
           spacemouse_device_close(mon_mouse);
         }
 
       } else {
-        for ( ; iter; iter = iter->next) {
-          if (iter->fd > -1 && fds[n].fd == iter->fd) {
+        spacemouse_device_list_foreach(iter, iter) {
+          mouse_fd = spacemouse_device_get_fd(iter);
+          if (mouse_fd > -1 && fds[n].fd == mouse_fd) {
             int status;
 
             memset(&mouse_event, 0, sizeof mouse_event);

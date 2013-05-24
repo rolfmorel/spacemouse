@@ -31,42 +31,38 @@ int main()
   struct spacemouse *iter, *mon_mouse;
   spacemouse_event mouse_event;
   fd_set fds;
-  int monitor_fd, max_fd;
+  int mouse_fd, monitor_fd, max_fd;
   int action, read_event;
 
   monitor_fd = spacemouse_monitor_open();
 
-  iter = spacemouse_devices_update();
+  if (spacemouse_device_list_update() == NULL)
+    printf("No devices found.\n");
 
-  if (iter == NULL)
-    fprintf(stderr, "No devices found.\n");
-
-  while (iter) {
-    printf("device id: %d\n", iter->id);
-    printf("  devnode: %s\n", iter->devnode);
-    printf("  manufacturer: %s\n", iter->manufacturer);
-    printf("  product: %s\n", iter->product);
+  spacemouse_device_list_foreach(iter, spacemouse_device_list()) {
+    printf("device id: %d\n", spacemouse_device_get_id(iter));
+    printf("  devnode: %s\n", spacemouse_device_get_devnode(iter));
+    printf("  manufacturer: %s\n", spacemouse_device_get_manufacturer(iter));
+    printf("  product: %s\n", spacemouse_device_get_product(iter));
 
     if (spacemouse_device_open(iter) == -1)
-      fprintf(stderr, "Failed to open device: %s\n", iter->devnode);
+      fprintf(stderr, "Failed to open device: %s\n",
+              spacemouse_device_get_devnode(iter));
 
-    iter = iter->next;
+    spacemouse_device_set_led(iter, 1);
   }
 
-  fprintf(stderr, "Entering monitor loop.\n");
-  while (1) {
+  printf("Entering monitor loop.\n");
+  while(1) {
     FD_ZERO(&fds);
     FD_SET(monitor_fd, &fds);
     max_fd = monitor_fd;
 
-    iter = spacemouse_devices();
-    while (iter) {
-      if (iter->fd > -1) {
-        FD_SET(iter->fd, &fds);
-        if (iter->fd > max_fd) max_fd = iter->fd;
+    spacemouse_device_list_foreach(iter, spacemouse_device_list())
+      if ((mouse_fd = spacemouse_device_get_fd(iter)) > -1) {
+        FD_SET(mouse_fd, &fds);
+        if (mouse_fd > max_fd) max_fd = mouse_fd;
       }
-      iter = iter->next;
-    }
 
     if (select(max_fd + 1, &fds, NULL, NULL, NULL) == -1) {
       perror("select");
@@ -77,36 +73,37 @@ int main()
       mon_mouse = spacemouse_monitor(&action);
 
       if (action == SPACEMOUSE_ACTION_ADD) {
-        printf("Device added, device id: %d\n", mon_mouse->id);
-
-        printf("  devnode: %s\n", mon_mouse->devnode);
-        printf("  manufacturer: %s\n", mon_mouse->manufacturer);
-        printf("  product: %s\n", mon_mouse->product);
+        printf("Device added, ");
 
         spacemouse_device_open(mon_mouse);
 
         spacemouse_device_set_led(mon_mouse, 1);
       } else if (action == SPACEMOUSE_ACTION_REMOVE) {
-        printf("Device removed, device id: %d\n", mon_mouse->id);
-
-        printf("  devnode: %s\n", mon_mouse->devnode);
-        printf("  manufacturer: %s\n", mon_mouse->manufacturer);
-        printf("  product: %s\n", mon_mouse->product);
+        printf("Device removed, ");
 
         spacemouse_device_close(mon_mouse);
       }
+
+      if (action == SPACEMOUSE_ACTION_ADD ||
+          action == SPACEMOUSE_ACTION_REMOVE) {
+        printf("device id: %d\n", spacemouse_device_get_id(mon_mouse));
+        printf("  devnode: %s\n", spacemouse_device_get_devnode(mon_mouse));
+        printf("  manufacturer: %s\n",
+               spacemouse_device_get_manufacturer(mon_mouse));
+        printf("  product: %s\n", spacemouse_device_get_product(mon_mouse));
+      }
     }
 
-    iter = spacemouse_devices();
-    while (iter) {
-      if (iter->fd > -1 && FD_ISSET(iter->fd, &fds)) {
+    spacemouse_device_list_foreach(iter, spacemouse_device_list()) {
+      mouse_fd = spacemouse_device_get_fd(iter);
+      if (mouse_fd > -1 && FD_ISSET(mouse_fd, &fds)) {
         memset(&mouse_event, 0, sizeof mouse_event);
 
         read_event = spacemouse_device_read_event(iter, &mouse_event);
         if (read_event == -1)
           spacemouse_device_close(iter);
         else if (read_event == SPACEMOUSE_READ_SUCCESS) {
-          printf("device id %d: ", iter->id);
+          printf("device id %d: ", spacemouse_device_get_id(iter));
 
           if (mouse_event.type == SPACEMOUSE_EVENT_MOTION) {
             printf("got motion event: t(%d, %d, %d) ",
@@ -119,13 +116,9 @@ int main()
             printf("got button %s event b(%d)\n",
                    mouse_event.button.press ? "press" : "release",
                    mouse_event.button.bnum);
-          } else {
-            printf("got unknown event type(%d)\n", mouse_event.type);
           }
         }
       }
-
-      iter = iter->next;
     }
   }
 
