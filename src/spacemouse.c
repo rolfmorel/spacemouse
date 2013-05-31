@@ -95,7 +95,8 @@ int main(int argc, char **argv)
 
   char const *dev_opt = NULL, *man_opt = NULL, *pro_opt = NULL;
   int regex_mask = REG_EXTENDED | REG_NOSUB;
-  int min_deviation = MIN_DEVIATION, n_events = 0, millis_period = 0;
+  int grab_dev = 0, min_deviation = MIN_DEVIATION, n_events = 0;
+  int millis_period = 0;
 
   int state_arg = -1;
 
@@ -114,9 +115,10 @@ int main(int argc, char **argv)
     { 0, 0, 0, 0 }
   };
 
-  char const *opt_str_event_cmd = "d:m:p:iD:n:M:h";
+  char const *opt_str_event_cmd = "d:m:p:igD:n:M:h";
   struct option const long_options_event_cmd[] = {
     COMMON_LONG_OPTIONS
+    { "grab", no_argument, NULL, 'g'},
     { "deviation", required_argument, NULL, 'D' },
     { "events", required_argument, NULL, 'n' },
     { "millis", required_argument, NULL, 'M' },
@@ -237,6 +239,10 @@ int main(int argc, char **argv)
 
         case 'i':
           regex_mask |= REG_ICASE;
+          break;
+
+        case 'g':
+          grab_dev = 1;
           break;
 
         case 'D':
@@ -386,6 +392,12 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
       }
 
+      if (grab_dev && spacemouse_device_grab(iter) != 0) {
+        fprintf(stderr, "%s: failed to grab device: %s\n", *argv,
+                spacemouse_device_get_devnode(iter));
+        exit(EXIT_FAILURE);
+      }
+
       if (command == LED_CMD) {
         if (state_arg == -1 || state_arg == 2) {
           led_state = spacemouse_device_get_led(iter);
@@ -488,6 +500,12 @@ int main(int argc, char **argv)
             if (spacemouse_device_open(mon_mouse) == -1) {
               fprintf(stderr, "%s: failed to open device: %s\n", *argv,
                       spacemouse_device_get_devnode(mon_mouse));
+              exit(EXIT_FAILURE);
+            }
+
+            if (grab_dev && spacemouse_device_grab(iter) != 0) {
+              fprintf(stderr, "%s: failed to grab device: %s\n", *argv,
+                      spacemouse_device_get_devnode(iter));
               exit(EXIT_FAILURE);
             }
 
