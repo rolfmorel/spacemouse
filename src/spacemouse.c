@@ -41,10 +41,10 @@ along with spacemouse-utils.  If not, see <http://www.gnu.org/licenses/>.
 #define N_EVENTS 16
 
 enum {
-  NO_CMD,
-  LIST_CMD,
-  LED_CMD,
-  EVENT_CMD
+  NO_CMD = 1,
+  LIST_CMD = 1 << 1,
+  LED_CMD = 1 << 2,
+  EVENT_CMD = 1 << 3
 };
 
 struct axis_event {
@@ -264,7 +264,7 @@ int main(int argc, char **argv)
 
           printf("%s", help_common_opts);
 
-          if (command == NO_CMD || command == EVENT_CMD)
+          if (command & (NO_CMD | EVENT_CMD))
             printf("%s", help_event_opts);
 
           printf("%s", help_common_opts_end);
@@ -308,7 +308,7 @@ int main(int argc, char **argv)
       else
         invalid = 1;
     } else if (optind != argc) {
-      if (command == LED_CMD || command == NO_CMD)
+      if (command & (LED_CMD | NO_CMD))
         invalid = 2;
       else
         invalid = 1;
@@ -356,7 +356,7 @@ int main(int argc, char **argv)
     if (skip == 0) {
       int led_state = -1;
 
-      if (command == NO_CMD || command == LIST_CMD) {
+      if (command & (NO_CMD | LIST_CMD)) {
         printf("devnode: %s\n"
                "manufacturer: %s\n"
                "product: %s\n"
