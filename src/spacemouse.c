@@ -93,7 +93,6 @@ int main(int argc, char **argv)
   spacemouse_event mouse_event;
   int command = NO_CMD, multi_call = 0;
 
-  char const *opt_str = "d:m:p:ih";
   char const *dev_opt = NULL, *man_opt = NULL, *pro_opt = NULL;
   int regex_mask = REG_EXTENDED | REG_NOSUB;
   int min_deviation = MIN_DEVIATION, n_events = 0, millis_period = 0;
@@ -102,17 +101,30 @@ int main(int argc, char **argv)
 
   int c, monitor_fd = -1;
 
-  struct option const long_options[] = {
-    { "devnode", required_argument, NULL, 'd' },
-    { "manufacturer", required_argument, NULL, 'm' },
-    { "product", required_argument, NULL, 'p' },
-    { "ignore-case", no_argument, NULL, 'i' },
+#define COMMON_LONG_OPTIONS \
+    { "devnode", required_argument, NULL, 'd' }, \
+    { "manufacturer", required_argument, NULL, 'm' }, \
+    { "product", required_argument, NULL, 'p' }, \
+    { "ignore-case", no_argument, NULL, 'i' }, \
+    { "help", no_argument, NULL, 'h' },
+
+  char const *opt_str_no_cmd = "d:m:p:ih";
+  struct option const long_options_no_cmd[] = {
+    COMMON_LONG_OPTIONS
+    { 0, 0, 0, 0 }
+  };
+
+  char const *opt_str_event_cmd = "d:m:p:iD:n:M:h";
+  struct option const long_options_event_cmd[] = {
+    COMMON_LONG_OPTIONS
     { "deviation", required_argument, NULL, 'D' },
     { "n-events", required_argument, NULL, 'n' },
     { "millis", required_argument, NULL, 'M' },
-    { "help", no_argument, NULL, 'h' },
     { 0, 0, 0, 0 }
   };
+
+  char const *opt_str = opt_str_no_cmd;
+  struct option const *long_options = long_options_no_cmd;
 
   {
     int str_len = strlen(*argv);
@@ -129,7 +141,8 @@ int main(int argc, char **argv)
                strcmp(*argv + (str_len - 16), "spacemouse-event") == 0) {
       multi_call = 1;
       command = EVENT_CMD;
-      opt_str = "d:m:p:iD:n:M:h";
+      opt_str = opt_str_event_cmd;
+      long_options = long_options_event_cmd;
     } else if (argc >= 2) {
       if (strcmp(argv[1], "list") == 0) {
         command = LIST_CMD;
@@ -140,7 +153,8 @@ int main(int argc, char **argv)
       } else if (strcmp(argv[1], "event") == 0) {
         command = EVENT_CMD;
         optind = 2;
-        opt_str = "d:m:p:iD:n:M:h";
+        opt_str = opt_str_event_cmd;
+        long_options = long_options_event_cmd;
       }
     }
 
