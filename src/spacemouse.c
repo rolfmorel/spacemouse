@@ -241,7 +241,7 @@ int main(int argc, char **argv)
 
         case 'D':
           if ((tmp = atoi(optarg)) < 1) {
-            fprintf(stderr, "%s: option 'deviation' needs to be a valid "
+            fprintf(stderr, "%s: option '--deviation' needs to be a valid "
                     "positive integer\n", *argv);
             exit(EXIT_FAILURE);
           } else
@@ -250,7 +250,7 @@ int main(int argc, char **argv)
 
         case 'n':
           if ((tmp = atoi(optarg)) < 1) {
-            fprintf(stderr, "%s: option 'n-events' needs to be a valid "
+            fprintf(stderr, "%s: option '--n-events' needs to be a valid "
                     "positive integer\n", *argv);
             exit(EXIT_FAILURE);
           } else
@@ -259,7 +259,7 @@ int main(int argc, char **argv)
 
         case 'M':
           if ((tmp = atoi(optarg)) < 1) {
-            fprintf(stderr, "%s: option 'time' needs to be a valid "
+            fprintf(stderr, "%s: option '--millis' needs to be a valid "
                     "positive integer, in milliseconds\n", *argv);
             exit(EXIT_FAILURE);
           } else
@@ -294,7 +294,7 @@ int main(int argc, char **argv)
   }
 
   if (n_events != 0 && millis_period != 0) {
-    fprintf(stderr, "%s: options 'n-events' and 'millis' are mutually "
+    fprintf(stderr, "%s: options '--n-events' and '--millis' are mutually "
             "exclusive\n", *argv);
     exit(EXIT_FAILURE);
   } else if (n_events == 0)
@@ -335,10 +335,10 @@ int main(int argc, char **argv)
         fprintf(stderr, "%s: expected zero or one non-option arguments, see "
                 "'-h' for help\n", *argv);
       else if (invalid == 3)
-        fprintf(stderr, "%s: invalid non-option argument -- %s, see '-h' "
+        fprintf(stderr, "%s: invalid non-option argument -- '%s', see '-h' "
                 "for help\n", *argv, argv[optind]);
       else if (invalid == 4)
-        fprintf(stderr, "%s: invalid command argument -- %s, see '-h' for "
+        fprintf(stderr, "%s: invalid command argument -- '%s', see '-h' for "
                 "help\n", *argv, argv[optind]);
 
       exit(EXIT_FAILURE);
