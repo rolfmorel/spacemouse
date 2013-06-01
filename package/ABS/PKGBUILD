@@ -1,0 +1,32 @@
+# Maintainer: Rolf Morel <$myfullname_without_spaces@gmail.com>
+pkgname="spacemouse-utils-git"
+pkgver=0.0.0
+pkgrel=1
+pkgdesc="A collection of simple utilies for 3D/6DoF input devices"
+arch=('i686' 'x86_64' 'armv6h')
+url="https://github.com/polyphemus/spacemouse-utils"
+license=('GPL3')
+depends=('glibc' 'libspacemouse')
+makedepends=('git')
+provides=("spacemouse-utils")
+conflicts=("spacemouse-utils")
+source=('git://github.com/polyphemus/spacemouse-utils.git')
+md5sums=('SKIP')
+
+pkgver() {
+  cd "$srcdir/spacemouse-utils"
+  echo $(git rev-list --count HEAD).$(git rev-parse --short HEAD)
+}
+
+build() {
+  cd "$srcdir/spacemouse-utils"
+
+  ./configure --prefix=/usr --enable-opt --disable-debug
+  make
+}
+
+package() {
+  cd "$srcdir/spacemouse-utils"
+  make DESTDIR="$pkgdir" install
+}
+
