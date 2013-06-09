@@ -524,6 +524,9 @@ int main(int argc, char **argv)
                    spacemouse_device_get_product(mon_mouse));
             fflush(stdout);
           }
+          if (grab_dev)
+            spacemouse_device_ungrab(mon_mouse);
+
           spacemouse_device_close(mon_mouse);
         }
 
