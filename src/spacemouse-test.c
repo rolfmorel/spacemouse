@@ -48,8 +48,8 @@ int main()
     if (spacemouse_device_open(iter) == -1)
       fprintf(stderr, "Failed to open device: %s\n",
               spacemouse_device_get_devnode(iter));
-
-    spacemouse_device_set_led(iter, 1);
+    else
+      spacemouse_device_set_led(iter, 1);
   }
 
   while(1) {
@@ -74,9 +74,11 @@ int main()
       if (action == SPACEMOUSE_ACTION_ADD) {
         printf("Device added, ");
 
-        spacemouse_device_open(mon_mouse);
-
-        spacemouse_device_set_led(mon_mouse, 1);
+        if (spacemouse_device_open(mon_mouse) == -1)
+          fprintf(stderr, "Failed to open device: %s\n",
+                  spacemouse_device_get_devnode(iter));
+        else
+          spacemouse_device_set_led(mon_mouse, 1);
       } else if (action == SPACEMOUSE_ACTION_REMOVE) {
         printf("Device removed, ");
 
