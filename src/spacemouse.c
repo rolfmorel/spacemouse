@@ -208,14 +208,14 @@ int main(int argc, char **argv)
 
     char const help_event_opts[] = \
 "  -g, --grab                 grab matched/all devices\n"
-"  -D, --deviation DEVIATION  minimum deviation on an motion axis needed\n"
+"  -D, --deviation=DEVIATION  minimum deviation on an motion axis needed\n"
 "                             to register as an event\n"
 "                             default is: " STR(MIN_DEVIATION) "\n"
-"  -n, --events N             number of consecutive events for which\n"
+"  -n, --events=N             number of consecutive events for which\n"
 "                             deviaton must exceed minimum deviation before\n"
 "                             printing an event to stdout\n"
 "                             default is: " STR(N_EVENTS) "\n"
-"  -M, --millis MILLISECONDS  millisecond period in which consecutive\n"
+"  -M, --millis=MILLISECONDS  millisecond period in which consecutive\n"
 "                             events' deviaton must exceed minimum deviation\n"
 "                             before printing an event to stdout\n";
 
