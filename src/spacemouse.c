@@ -207,7 +207,7 @@ int main(int argc, char **argv)
 "                             insensitive\n";
 
     char const help_event_opts[] = \
-"  -g, --grab                 grab matched/all devices"
+"  -g, --grab                 grab matched/all devices\n"
 "  -D, --deviation DEVIATION  minimum deviation on an motion axis needed\n"
 "                             to register as an event\n"
 "                             default is: " STR(MIN_DEVIATION) "\n"
