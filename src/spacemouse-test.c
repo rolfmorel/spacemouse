@@ -52,7 +52,6 @@ int main()
     spacemouse_device_set_led(iter, 1);
   }
 
-  printf("Entering monitor loop.\n");
   while(1) {
     FD_ZERO(&fds);
     FD_SET(monitor_fd, &fds);
