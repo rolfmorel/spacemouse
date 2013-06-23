@@ -246,7 +246,11 @@ int run_list_command(int argc, char **argv)
 
   struct spacemouse *iter;
   spacemouse_device_list_foreach(iter, spacemouse_device_list_update())
-    if (match_device(iter)) {
+    if ((match = match_device(iter)) == -1) {
+      fprintf(stderr, "%s: failed to use regex, please use valid ERE\n",
+              *argv);
+      return EXIT_FAILURE;
+    } else if (match) {
       printf("devnode: %s\n", spacemouse_device_get_devnode(iter));
       printf("manufacturer: %s\n", spacemouse_device_get_manufacturer(iter));
       printf("product: %s\n\n", spacemouse_device_get_product(iter));
