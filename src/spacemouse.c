@@ -471,7 +471,7 @@ int run_event_command(int argc, char **argv)
         struct spacemouse *mon_mouse = spacemouse_monitor(&action);
 
         if (action == SPACEMOUSE_ACTION_ADD) {
-          if (match_device(mon_mouse) == 0) {
+          if (match_device(mon_mouse)) {
             if (spacemouse_device_open(mon_mouse) == -1) {
               fprintf(stderr, "%s: failed to open device: %s\n", *argv,
                       spacemouse_device_get_devnode(mon_mouse));
