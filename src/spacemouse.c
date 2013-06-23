@@ -239,8 +239,8 @@ int run_list_command(int argc, char **argv)
   }
 
   if (optind != argc) {
-    fprintf(stderr, "%s: does not take non-command or non-option arguments\n",
-            *argv);
+    fprintf(stderr, "%s: invalid non-command or non-option argument(s), see "
+            "'-h' for help\n", *argv);
     return EXIT_FAILURE;
   }
 
@@ -383,8 +383,8 @@ int run_event_command(int argc, char **argv)
   }
 
   if (optind != argc) {
-    fprintf(stderr, "%s: does not take non-command or non-option arguments\n",
-            *argv);
+    fprintf(stderr, "%s: invalid non-command or non-option argument(s), see "
+            "'-h' for help\n", *argv);
     return EXIT_FAILURE;
   }
 
