@@ -119,7 +119,7 @@ int run_regex(char const *regex, char const *string, int comp_mask)
   return ret;
 }
 
-bool match_device(struct spacemouse *mouse)
+int match_device(struct spacemouse *mouse)
 {
   int match = 0;
   char const *opts[] = { dev_opt, man_opt, pro_opt };
