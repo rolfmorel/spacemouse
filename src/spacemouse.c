@@ -200,7 +200,7 @@ int parse_arguments(int argc, char **argv, char const *opt_str,
           printf(cur_help_str);
         } while ((cur_help_str = *(++help_strs)));
 
-        exit(EXIT_SUCCESS);
+        return -1;
         break;
 
       case '?':
@@ -235,7 +235,7 @@ int run_list_command(int argc, char **argv)
     int status = parse_arguments(argc, argv, opt_str_no_cmd,
                                  long_options_no_cmd);
     if (status != 0)
-      return status;
+      return status == -1 ? 0 : status;
   }
 
   if (optind != argc) {
@@ -273,7 +273,7 @@ int run_led_command(int argc, char **argv)
     int status = parse_arguments(argc, argv, opt_str_no_cmd,
                                  long_options_no_cmd);
     if (status != 0)
-      return status;
+      return status == -1 ? 0 : status;
   }
 
   int match, state_arg = -1;
@@ -379,7 +379,7 @@ int run_event_command(int argc, char **argv)
     int status = parse_arguments(argc, argv, opt_str_event_cmd,
                                  long_options_event_cmd);
     if (status != 0)
-      return status;
+      return status == -1 ? 0 : status;
   }
 
   if (optind != argc) {
@@ -472,13 +472,13 @@ int run_event_command(int argc, char **argv)
             if (spacemouse_device_open(mon_mouse) == -1) {
               fprintf(stderr, "%s: failed to open device: %s\n", *argv,
                       spacemouse_device_get_devnode(mon_mouse));
-              exit(EXIT_FAILURE);
+              return EXIT_FAILURE;
             }
 
             if (grab_opt && spacemouse_device_grab(iter) != 0) {
               fprintf(stderr, "%s: failed to grab device: %s\n", *argv,
                       spacemouse_device_get_devnode(iter));
-              exit(EXIT_FAILURE);
+              return EXIT_FAILURE;
             }
 
             printf("device: %s %s %s connect\n",
