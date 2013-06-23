@@ -61,7 +61,7 @@ int grab_opt = 0, deviation_opt = MIN_DEVIATION, events_opt = 0;
 int millis_opt = 0;
 char const *dev_opt = NULL, *man_opt = NULL, *pro_opt = NULL;
 
-char const **help_strs;
+char const **help_strs = NULL;
 
 #define COMMON_LONG_OPTIONS \
     { "devnode", required_argument, NULL, 'd' }, \
