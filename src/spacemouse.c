@@ -407,10 +407,9 @@ int run_event_command(int argc, char **argv)
                                        { 0, 0, "roll left" },
                                       };
 
-  struct spacemouse *iter;
-
   int match, monitor_fd = spacemouse_monitor_open();
 
+  struct spacemouse *iter;
   spacemouse_device_list_foreach(iter, spacemouse_device_list_update()) {
     if ((match = match_device(iter)) == -1) {
       fprintf(stderr, "%s: failed to use regex, please use valid ERE\n",
