@@ -42,7 +42,7 @@ int main()
     printf("  product: %s\n", spacemouse_device_get_product(iter));
 
     if (spacemouse_device_open(iter) == -1)
-      fprintf(stderr, "Failed to open device: %s\n",
+      fprintf(stderr, "failed to open device: %s\n",
               spacemouse_device_get_devnode(iter));
     else
       spacemouse_device_set_led(iter, 1);
@@ -75,7 +75,7 @@ int main()
         printf("Device added, ");
 
         if (spacemouse_device_open(mon_mouse) == -1)
-          fprintf(stderr, "Failed to open device: %s\n",
+          fprintf(stderr, "failed to open device: %s\n",
                   spacemouse_device_get_devnode(iter));
         else
           spacemouse_device_set_led(mon_mouse, 1);
