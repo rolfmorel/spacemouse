@@ -28,13 +28,9 @@ along with spacemouse-utils.  If not, see <http://www.gnu.org/licenses/>.
 
 int main()
 {
-  struct spacemouse *iter, *mon_mouse;
-  spacemouse_event mouse_event;
-  fd_set fds;
-  int mouse_fd, monitor_fd, max_fd;
-  int action, read_event;
+  struct spacemouse *iter;
 
-  monitor_fd = spacemouse_monitor_open();
+  int monitor_fd = spacemouse_monitor_open();
 
   if (spacemouse_device_list_update() == NULL)
     printf("No devices found.\n");
@@ -53,9 +49,11 @@ int main()
   }
 
   while(1) {
+    fd_set fds;
+
     FD_ZERO(&fds);
     FD_SET(monitor_fd, &fds);
-    max_fd = monitor_fd;
+    int mouse_fd, max_fd = monitor_fd;
 
     spacemouse_device_list_foreach(iter, spacemouse_device_list())
       if ((mouse_fd = spacemouse_device_get_fd(iter)) > -1) {
@@ -69,7 +67,9 @@ int main()
     }
 
     if (FD_ISSET(monitor_fd, &fds)) {
-      mon_mouse = spacemouse_monitor(&action);
+      int action;
+
+      struct spacemouse *mon_mouse = spacemouse_monitor(&action);
 
       if (action == SPACEMOUSE_ACTION_ADD) {
         printf("Device added, ");
@@ -98,9 +98,9 @@ int main()
     spacemouse_device_list_foreach(iter, spacemouse_device_list()) {
       mouse_fd = spacemouse_device_get_fd(iter);
       if (mouse_fd > -1 && FD_ISSET(mouse_fd, &fds)) {
-        memset(&mouse_event, 0, sizeof mouse_event);
+        spacemouse_event mouse_event = { 0 };
 
-        read_event = spacemouse_device_read_event(iter, &mouse_event);
+        int read_event = spacemouse_device_read_event(iter, &mouse_event);
         if (read_event == -1)
           spacemouse_device_close(iter);
         else if (read_event == SPACEMOUSE_READ_SUCCESS) {
