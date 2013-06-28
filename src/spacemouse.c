@@ -244,6 +244,8 @@ int run_list_command(int argc, char **argv)
     return EXIT_FAILURE;
   }
 
+  int match;
+
   struct spacemouse *iter;
   spacemouse_device_list_foreach(iter, spacemouse_device_list_update())
     if ((match = match_device(iter)) == -1) {
