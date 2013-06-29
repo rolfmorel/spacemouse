@@ -41,7 +41,7 @@ along with spacemouse-utils.  If not, see <http://www.gnu.org/licenses/>.
 #define MIN_DEVIATION 256
 #define N_EVENTS 16
 
-enum command_t {
+enum {
   NO_CMD = 1,
   LIST_CMD = 1 << 1,
   LED_CMD = 1 << 2,
