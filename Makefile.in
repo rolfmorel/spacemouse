@@ -6,7 +6,7 @@ all: src $(spacemouse_bins) $(spacemouse_links)
 .PHONY: src
 src:
 	@$(MAKE) -C src
-	cp $(addprefix src/, $(spacemouse_bins)) .
+	cp $(addprefix src/, $(spacemouse_bins)) $(CURDIR)
 
 spacemouse-%: spacemouse
 	ln -s spacemouse $@
@@ -29,4 +29,4 @@ clean:
 
 .PHONY: distclean
 distclean: clean
-	rm -f ./src/Makefile Makefile
+	rm -f $(CURDIR)/src/Makefile Makefile
