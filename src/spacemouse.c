@@ -48,6 +48,13 @@ enum {
   EVENT_CMD = 1 << 3
 } command = NO_CMD;
 
+enum led_arg {
+  LED_NONE,
+  LED_ON,
+  LED_OFF,
+  LED_SWITCH
+};
+
 struct axis_event {
   unsigned int n_events;
   unsigned int millis;
@@ -312,7 +319,8 @@ int run_led_command(int argc, char **argv)
       return status == -1 ? 0 : status;
   }
 
-  int match, state_arg = -1;
+  int match;
+  enum led_arg state_arg = LED_NONE;
 
   if (optind == (argc - 1)) {
     char *ptr;
@@ -320,12 +328,12 @@ int run_led_command(int argc, char **argv)
       *ptr = tolower(*ptr);
 
     if (strcmp(argv[optind], "on") == 0 || strcmp(argv[optind], "1") == 0)
-      state_arg = 1;
+      state_arg = LED_ON;
     else if (strcmp(argv[optind], "off") == 0 ||
              strcmp(argv[optind], "0") == 0)
-      state_arg = 0;
+      state_arg = LED_OFF;
     else if (strcmp(argv[optind], "switch") == 0)
-      state_arg = 2;
+      state_arg = LED_SWITCH;
     else {
       fprintf(stderr, "%s: invalid non-option argument -- '%s', see '-h' "
               "for help\n", *argv, argv[optind]);
@@ -352,7 +360,7 @@ int run_led_command(int argc, char **argv)
         return EXIT_FAILURE;
       }
 
-      if (state_arg == -1 || state_arg == 2) {
+      if (state_arg == LED_NONE || state_arg == LED_SWITCH) {
         led_state = spacemouse_device_get_led(iter);
         if (led_state == -1) {
           fprintf(stderr, "%s: failed to get led state for: %s\n", *argv,
@@ -361,20 +369,20 @@ int run_led_command(int argc, char **argv)
         }
       }
 
-      if (state_arg == -1) {
+      if (state_arg == LED_NONE) {
         printf("%s: %s\n", spacemouse_device_get_devnode(iter),
                led_state ? "on": "off");
       } else {
         int state = state_arg;
 
-        if (state_arg == 2)
+        if (state_arg == LED_SWITCH)
           state = !led_state;
         if (spacemouse_device_set_led(iter, state) != 0) {
           fprintf(stderr, "%s: failed to set led state for: %s\n", *argv,
                   spacemouse_device_get_devnode(iter));
           return EXIT_FAILURE;
         }
-        if (state_arg == 2) {
+        if (state_arg == LED_SWITCH) {
           printf("%s: switched %s\n", spacemouse_device_get_devnode(iter),
                  state ? "on": "off");
         }
