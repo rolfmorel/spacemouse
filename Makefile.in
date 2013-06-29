@@ -8,7 +8,7 @@ src:
 	@$(MAKE) -C src
 	cp $(addprefix src/, $(spacemouse_bins)) $(CURDIR)
 
-spacemouse-%: spacemouse
+$(spacemouse_links): spacemouse
 	ln -s spacemouse $@
 
 .PHONY: install
