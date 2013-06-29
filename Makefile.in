@@ -8,14 +8,14 @@ src:
 	@$(MAKE) -C src
 	cp $(addprefix src/, $(spacemouse_bins)) .
 
+spacemouse-%: spacemouse
+	ln -s spacemouse $@
+
 .PHONY: install
 install: $(spacemouse_bins) $(spacemouse_links)
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	install -m 755 $(spacemouse_bins) $(DESTDIR)$(PREFIX)/bin
 	cp -fd $(spacemouse_links) $(DESTDIR)$(PREFIX)/bin
-
-spacemouse-%: spacemouse
-	ln -sf spacemouse $@
 
 .PHONY: uninstall
 uninstall:
