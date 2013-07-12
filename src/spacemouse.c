@@ -49,9 +49,9 @@ enum {
 } command = NO_CMD;
 
 enum led_arg {
-  LED_NONE,
-  LED_ON,
+  LED_NONE = -1,
   LED_OFF,
+  LED_ON,
   LED_SWITCH
 };
 
