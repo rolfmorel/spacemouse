@@ -49,9 +49,8 @@ spacemouse-event | head -1
 spacemouse-event | head -10 | tail -2
 
 # return only the first button press (Not all programs react on a broken pipe
-# immediately,but only react on an error when trying to write. That means that
-# when requesting a single event, some programs only return when an error
-# occurs on writing the second event)
+# immediately, but only react to an error when trying to read/write. That means
+# that some programs only return when an error occurs on writing the next event)
 spacemouse-event | sed -urn 's/button: ([0-9]+) press/\1/p' | head -1
 # or (telling sed to quit thus close the pipe immediately, does work)
 spacemouse-event | sed -urn 's/button: ([0-9]+) press/\1/p;q'
