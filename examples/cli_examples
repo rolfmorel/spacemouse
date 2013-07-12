@@ -1,6 +1,4 @@
-#!/bin/bash
-
-set -v
+#!/bin/bash -v
 
 export PATH="$( cd "$( dirname "$( dirname "$0" )" )" && pwd ):$PATH"
 
