@@ -475,6 +475,11 @@ int run_event_command(int argc, char **argv)
     }
   }
 
+  /* If piped to another program, that program will probably want to parse
+   * the output by line.
+   */
+  setvbuf(stdout, NULL, _IOLBF, 0);
+
   while(true) {
     int mouse_fd, fds_idx = 0;
 
@@ -614,11 +619,6 @@ int run_event_command(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-  /* If piped to another program, that program will probably want to parse
-   * the output by line.
-   */
-  setvbuf(stdout, NULL, _IOLBF, 0);
-
   {
     int str_len = strlen(*argv);
 
