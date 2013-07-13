@@ -312,7 +312,6 @@ int run_led_command(int argc, char **argv)
       return status;
   }
 
-  int match;
   enum led_arg state_arg = LED_NONE;
 
   if (optind == (argc - 1)) {
@@ -338,6 +337,7 @@ int run_led_command(int argc, char **argv)
     return EXIT_FAILURE;
   }
 
+  int match;
   struct spacemouse *iter;
   spacemouse_device_list_foreach(iter, spacemouse_device_list_update()) {
     if ((match = match_device(iter)) == -1) {
