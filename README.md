@@ -7,7 +7,13 @@ Simple programs for:
 * recieving events on connected 6DoF devices (device, motion and button events)
 * testing/debugging (of libspacemouse)
 
-## Run
+### Currently supported devices
+3Dconnexion USB human interface devices:
+* SpaceExplorer
+* SpaceNavigator
+* etc.
+
+## Usage
 
     $ spacemouse-list
     devnode: /dev/input/event4
@@ -53,7 +59,6 @@ Simple programs for:
       devnode: /dev/input/event0
       manufacturer: 3Dconnexion
       product: SpaceExplorer
-    Entering monitor loop.
     device id 1: got motion event: t(-1, -19, 0) r(0, 0, 0) period(0)
     device id 1: got motion event: t(-7, 0, 10) r(0, 0, 0) period(16)
     device id 1: got motion event: t(-7, 0, 10) r(-29, 0, -14) period(8)
