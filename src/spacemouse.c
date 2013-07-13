@@ -61,11 +61,10 @@ struct axis_event {
   char const * const event_str;
 };
 
-bool multi_call = false;
+bool multi_call = false, grab_opt = false;
 
 int regex_mask = REG_EXTENDED | REG_NOSUB;
-int grab_opt = 0, deviation_opt = MIN_DEVIATION, events_opt = 0;
-int millis_opt = 0;
+int deviation_opt = MIN_DEVIATION, events_opt = 0, millis_opt = 0;
 char const *dev_opt = NULL, *man_opt = NULL, *pro_opt = NULL;
 
 #define COMMON_LONG_OPTIONS \
@@ -185,7 +184,7 @@ int parse_arguments(int argc, char **argv, char const *opt_str,
         break;
 
       case 'g':
-        grab_opt = 1;
+        grab_opt = true;
         break;
 
       case 'D':
