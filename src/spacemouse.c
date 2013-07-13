@@ -120,8 +120,7 @@ char const help_event_opts[] = \
 "                             before printing an event to stdout\n";
 
 char const help_common_opts_end[] = \
-"  -h, --help                 display this help\n"
-"\n";
+"  -h, --help                 display this help\n";
 
 int run_regex(char const *regex, char const *string, int comp_mask)
 {
