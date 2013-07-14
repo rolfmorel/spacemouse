@@ -24,6 +24,7 @@ along with spacemouse-utils.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <errno.h>
 #include <ctype.h>
 #include <sys/types.h>
 #include <regex.h>
@@ -348,16 +349,16 @@ int run_led_command(int argc, char **argv)
       int led_state = -1;
 
       if (spacemouse_device_open(iter) == -1) {
-        fprintf(stderr, "%s: failed to open device: %s\n", *argv,
-                spacemouse_device_get_devnode(iter));
+        fprintf(stderr, "%s: failed to open device '%s': %s\n", *argv,
+                spacemouse_device_get_devnode(iter), strerror(errno));
         return EXIT_FAILURE;
       }
 
       if (state_arg == LED_NONE || state_arg == LED_SWITCH) {
         led_state = spacemouse_device_get_led(iter);
         if (led_state == -1) {
-          fprintf(stderr, "%s: failed to get led state for: %s\n", *argv,
-                  spacemouse_device_get_devnode(iter));
+          fprintf(stderr, "%s: failed to get led state for '%s': %s\n", *argv,
+                  spacemouse_device_get_devnode(iter), strerror(errno));
           return EXIT_FAILURE;
         }
       }
@@ -371,7 +372,7 @@ int run_led_command(int argc, char **argv)
         if (state_arg == LED_SWITCH)
           state = !led_state;
         if (spacemouse_device_set_led(iter, state) != 0) {
-          fprintf(stderr, "%s: failed to set led state for: %s\n", *argv,
+          fprintf(stderr, "%s: failed to set led state for '%s'\n", *argv,
                   spacemouse_device_get_devnode(iter));
           return EXIT_FAILURE;
         }
@@ -460,14 +461,14 @@ int run_event_command(int argc, char **argv)
       return EXIT_FAILURE;
     } else if (match) {
       if (spacemouse_device_open(iter) == -1) {
-        fprintf(stderr, "%s: failed to open device: %s\n", *argv,
-                spacemouse_device_get_devnode(iter));
+        fprintf(stderr, "%s: failed to open device '%s': %s\n", *argv,
+                spacemouse_device_get_devnode(iter), strerror(errno));
         return EXIT_FAILURE;
       }
 
       if (grab_opt && spacemouse_device_grab(iter) != 0) {
-        fprintf(stderr, "%s: failed to grab device: %s\n", *argv,
-                spacemouse_device_get_devnode(iter));
+        fprintf(stderr, "%s: failed to grab device '%s': %s\n", *argv,
+                spacemouse_device_get_devnode(iter), strerror(errno));
         return EXIT_FAILURE;
       }
     }
@@ -517,14 +518,15 @@ int run_event_command(int argc, char **argv)
         if (action == SPACEMOUSE_ACTION_ADD) {
           if (match_device(mon_mouse)) {
             if (spacemouse_device_open(mon_mouse) == -1) {
-              fprintf(stderr, "%s: failed to open device: %s\n", *argv,
-                      spacemouse_device_get_devnode(mon_mouse));
+              fprintf(stderr, "%s: failed to open device '%s': %s\n", *argv,
+                      spacemouse_device_get_devnode(mon_mouse),
+                      strerror(errno));
               return EXIT_FAILURE;
             }
 
             if (grab_opt && spacemouse_device_grab(iter) != 0) {
-              fprintf(stderr, "%s: failed to grab device: %s\n", *argv,
-                      spacemouse_device_get_devnode(iter));
+              fprintf(stderr, "%s: failed to grab device '%s': %s\n", *argv,
+                      spacemouse_device_get_devnode(iter), strerror(errno));
               return EXIT_FAILURE;
             }
 
