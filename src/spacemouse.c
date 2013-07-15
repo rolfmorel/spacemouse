@@ -250,7 +250,7 @@ int run_list_command(int argc, char **argv)
         printf(help_event_opts);
       printf(help_common_opts_end);
 
-      return 0;
+      return EXIT_SUCCESS;
     } else if (status != 0)
       return status;
   }
@@ -302,7 +302,7 @@ int run_led_command(int argc, char **argv)
         printf(help_event_opts);
       printf(help_common_opts_end);
 
-      return 0;
+      return EXIT_SUCCESS;
     } else if (status != 0)
       return status;
   }
@@ -423,7 +423,7 @@ int run_event_command(int argc, char **argv)
       printf(help_event_opts);
       printf(help_common_opts_end);
 
-      return 0;
+      return EXIT_SUCCESS;
     } else if (status != 0)
       return status;
   }
@@ -603,7 +603,7 @@ int run_event_command(int argc, char **argv)
     }
   }
 
-  return 0;
+  return EXIT_SUCCESS;
 }
 
 int main(int argc, char **argv)
