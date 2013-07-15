@@ -49,13 +49,6 @@ enum {
   EVENT_CMD = 1 << 3
 } command = NO_CMD;
 
-enum led_arg {
-  LED_NONE = -1,
-  LED_OFF,
-  LED_ON,
-  LED_SWITCH
-};
-
 bool multi_call = false, grab_opt = false;
 
 int regex_mask = REG_EXTENDED | REG_NOSUB;
@@ -280,6 +273,13 @@ int run_list_command(int argc, char **argv)
 
 int run_led_command(int argc, char **argv)
 {
+  enum {
+    LED_NONE = -1,
+    LED_OFF,
+    LED_ON,
+    LED_SWITCH
+  } state_arg = LED_NONE;
+
   {
     char const help_led_cmd[] = \
 "Usage: spacemouse-led [OPTIONS]\n"
@@ -306,8 +306,6 @@ int run_led_command(int argc, char **argv)
     } else if (status != 0)
       return status;
   }
-
-  enum led_arg state_arg = LED_NONE;
 
   if (optind == (argc - 1)) {
     char *ptr;
