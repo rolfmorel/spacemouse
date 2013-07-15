@@ -56,12 +56,6 @@ enum led_arg {
   LED_SWITCH
 };
 
-struct axis_event {
-  unsigned int n_events;
-  unsigned int millis;
-  char const * const event_str;
-};
-
 bool multi_call = false, grab_opt = false;
 
 int regex_mask = REG_EXTENDED | REG_NOSUB;
@@ -391,6 +385,13 @@ int run_led_command(int argc, char **argv)
 
 int run_event_command(int argc, char **argv)
 {
+  struct axis_event {
+    unsigned int pos;
+    unsigned int neg;
+    char const * pos_str;
+    char const * neg_str;
+  };
+
   {
     char const *opt_str_event_cmd = "d:m:p:igD:n:M:h";
     struct option const long_options_event_cmd[] = {
@@ -433,37 +434,21 @@ int run_event_command(int argc, char **argv)
   }
 
 #ifndef AXIS_MAP_SPACENAVD
-  struct axis_event axis_pos_map[] = { { 0, 0, "right" },
-                                       { 0, 0, "back" },
-                                       { 0, 0, "down" },
-                                       { 0, 0, "pitch back" },
-                                       { 0, 0, "roll left" },
-                                       { 0, 0, "yaw right" },
-                                      };
-
-  struct axis_event axis_neg_map[] = { { 0, 0, "left" },
-                                       { 0, 0, "forward" },
-                                       { 0, 0, "up" },
-                                       { 0, 0, "pitch forward" },
-                                       { 0, 0, "roll right" },
-                                       { 0, 0, "yaw left" },
-                                      };
+  struct axis_event axis_map[] = { { 0, 0, "right", "left" },
+                                   { 0, 0, "back", "forward" },
+                                   { 0, 0, "down", "up" },
+                                   { 0, 0, "pitch back", "pitch forward" },
+                                   { 0, 0, "roll left", "roll right" },
+                                   { 0, 0, "yaw right", "yaw left" },
+                                  };
 #else
-  struct axis_event axis_pos_map[] = { { 0, 0, "right" },
-                                       { 0, 0, "up" },
-                                       { 0, 0, "forward" },
-                                       { 0, 0, "pitch back" },
-                                       { 0, 0, "yaw left" },
-                                       { 0, 0, "roll right" },
-                                      };
-
-  struct axis_event axis_neg_map[] = { { 0, 0, "left" },
-                                       { 0, 0, "down" },
-                                       { 0, 0, "back" },
-                                       { 0, 0, "pitch forward" },
-                                       { 0, 0, "yaw right" },
-                                       { 0, 0, "roll left" },
-                                      };
+  struct axis_event axis_map[] = { { 0, 0, "right", "left" },
+                                   { 0, 0, "up", "down" },
+                                   { 0, 0, "forward", "back" },
+                                   { 0, 0, "pitch back", "pitch forward" },
+                                   { 0, 0, "yaw left", "yaw right" },
+                                   { 0, 0, "roll right", "roll left" },
+                                  };
 #endif
 
   int match, monitor_fd = spacemouse_monitor_open();
@@ -580,47 +565,38 @@ int run_event_command(int argc, char **argv)
               if (mouse_event.type == SPACEMOUSE_EVENT_MOTION) {
                 int *int_ptr = &mouse_event.motion.x;
                 for (int i = 0; i < 6; i++) {
-                  int print_event = 0;
-                  struct axis_event *axis_map = 0, *axis_inverse_map;
+                  unsigned int *axis_pol = NULL;
+                  char const *axis_str = NULL;
 
                   if (int_ptr[i] > deviation_opt) {
-                    axis_map = axis_pos_map;
-                    axis_inverse_map = axis_neg_map;
-                  } else if (int_ptr[i] < (-1 * deviation_opt)) {
-                    axis_map = axis_neg_map;
-                    axis_inverse_map = axis_pos_map;
-                  } else {
-                    axis_pos_map[i].n_events = 0;
-                    axis_neg_map[i].n_events = 0;
-                    axis_pos_map[i].millis = 0;
-                    axis_neg_map[i].millis = 0;
-                  }
+                    axis_pol = &axis_map[i].pos;
+                    axis_str = axis_map[i].pos_str;
+                  } else
+                    axis_map[i].pos = 0;
 
-                  if (axis_map != 0) {
+                  if (int_ptr[i] < (-1 * deviation_opt)) {
+                    axis_pol = &axis_map[i].neg;
+                    axis_str = axis_map[i].neg_str;
+                  } else
+                    axis_map[i].neg = 0;
+
+                  if (axis_pol != NULL) {
                     if (millis_opt != 0) {
-                      axis_map[i].millis += mouse_event.motion.period;
-                      if (axis_map[i].millis > millis_opt) {
-                        axis_map[i].millis = \
-                            axis_map[i].millis % millis_opt;
-                        print_event = 1;
+                      *axis_pol += mouse_event.motion.period;
+                      if (*axis_pol > millis_opt) {
+                        *axis_pol = *axis_pol % millis_opt;
+                        printf("motion: %s\n", axis_str);
                       }
-
                     } else {
-                      axis_map[i].n_events += 1;
-                      axis_inverse_map[i].n_events = 0;
-                      if ((axis_map[i].n_events % events_opt) == 0)
-                        print_event = 1;
-                    }
-
-                    if (print_event) {
-                      printf("motion: %s\n", axis_map[i].event_str);
+                      *axis_pol += 1;
+                      if ((*axis_pol % events_opt) == 0)
+                        printf("motion: %s\n", axis_str);
                     }
                   }
                 }
-              } else if (mouse_event.type == SPACEMOUSE_EVENT_BUTTON) {
+              } else if (mouse_event.type == SPACEMOUSE_EVENT_BUTTON)
                 printf("button: %d %s\n", mouse_event.button.bnum,
                        mouse_event.button.press ? "press" : "release");
-              }
             }
           break;
           }
