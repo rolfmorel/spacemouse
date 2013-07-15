@@ -432,9 +432,23 @@ int run_event_command(int argc, char **argv)
     return EXIT_FAILURE;
   }
 
-  /* strings based on use of AXIS_MAP_SPACENAVD macro during libspacemouse
-   * compilation
-   */
+#ifndef AXIS_MAP_SPACENAVD
+  struct axis_event axis_pos_map[] = { { 0, 0, "right" },
+                                       { 0, 0, "back" },
+                                       { 0, 0, "down" },
+                                       { 0, 0, "pitch back" },
+                                       { 0, 0, "roll left" },
+                                       { 0, 0, "yaw right" },
+                                      };
+
+  struct axis_event axis_neg_map[] = { { 0, 0, "left" },
+                                       { 0, 0, "forward" },
+                                       { 0, 0, "up" },
+                                       { 0, 0, "pitch forward" },
+                                       { 0, 0, "roll right" },
+                                       { 0, 0, "yaw left" },
+                                      };
+#else
   struct axis_event axis_pos_map[] = { { 0, 0, "right" },
                                        { 0, 0, "up" },
                                        { 0, 0, "forward" },
@@ -450,6 +464,7 @@ int run_event_command(int argc, char **argv)
                                        { 0, 0, "yaw right" },
                                        { 0, 0, "roll left" },
                                       };
+#endif
 
   int match, monitor_fd = spacemouse_monitor_open();
 
