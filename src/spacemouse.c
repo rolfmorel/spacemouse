@@ -79,7 +79,7 @@ char const help_no_cmd[] = \
 "Usage: spacemouse [OPTIONS]\n"
 "       spacemouse <COMMAND> [OPTIONS]\n"
 "       spacemouse led [OPTIONS] (on | 1) | (off | 0)\n"
-"       spacemouse led [OPTIONS] switch\n"
+"       spacemouse led [OPTIONS] (switch | !)\n"
 "       spacemouse event [OPTIONS] (--events <N> | --millis <MILLISECONDS>)\n"
 "       spacemouse (-h | --help)\n"
 "\n"
@@ -284,7 +284,7 @@ int run_led_command(int argc, char **argv)
     char const help_led_cmd[] = \
 "Usage: spacemouse-led [OPTIONS]\n"
 "       spacemouse-led [OPTIONS] (on | 1) | (off | 0)\n"
-"       spacemouse-led [OPTIONS] switch\n"
+"       spacemouse-led [OPTIONS] (switch | !)\n"
 "       spacemouse-led (-h | --help)\n"
 "Print or manipulate the LED state of connected 3D/6DoF input devices.\n"
 "\n";
