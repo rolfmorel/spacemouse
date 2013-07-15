@@ -319,7 +319,8 @@ int run_led_command(int argc, char **argv)
     else if (strcmp(argv[optind], "off") == 0 ||
              strcmp(argv[optind], "0") == 0)
       state_arg = LED_OFF;
-    else if (strcmp(argv[optind], "switch") == 0)
+    else if (strcmp(argv[optind], "switch") == 0 ||
+             strcmp(argv[optind], "!") == 0)
       state_arg = LED_SWITCH;
     else {
       fprintf(stderr, "%s: invalid non-option argument -- '%s', see '-h' "
