@@ -568,12 +568,9 @@ int run_event_command(int argc, char **argv)
         spacemouse_device_list_foreach(iter, iter) {
           mouse_fd = spacemouse_device_get_fd(iter);
           if (mouse_fd > -1 && fds[n].fd == mouse_fd) {
-            spacemouse_event mouse_event;
-            int status;
+            spacemouse_event mouse_event = { 0 };
+            int status = spacemouse_device_read_event(iter, &mouse_event);
 
-            memset(&mouse_event, 0, sizeof mouse_event);
-
-            status = spacemouse_device_read_event(iter, &mouse_event);
             if (status == -1)
               spacemouse_device_close(iter);
             else if (status == SPACEMOUSE_READ_SUCCESS) {
