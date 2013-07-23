@@ -465,7 +465,7 @@ int run_event_command(int argc, char **argv)
         return EXIT_FAILURE;
       }
 
-      if (grab_opt && spacemouse_device_grab(iter) != 0) {
+      if (grab_opt && spacemouse_device_set_grab(iter, 1) != 0) {
         fprintf(stderr, "%s: failed to grab device '%s': %s\n", *argv,
                 spacemouse_device_get_devnode(iter), strerror(errno));
         return EXIT_FAILURE;
@@ -523,7 +523,7 @@ int run_event_command(int argc, char **argv)
               return EXIT_FAILURE;
             }
 
-            if (grab_opt && spacemouse_device_grab(iter) != 0) {
+            if (grab_opt && spacemouse_device_set_grab(iter, 1) != 0) {
               fprintf(stderr, "%s: failed to grab device '%s': %s\n", *argv,
                       spacemouse_device_get_devnode(iter), strerror(errno));
               return EXIT_FAILURE;
@@ -542,7 +542,7 @@ int run_event_command(int argc, char **argv)
                    spacemouse_device_get_product(mon_mouse));
 
             if (grab_opt)
-              spacemouse_device_ungrab(mon_mouse);
+              spacemouse_device_set_grab(mon_mouse, 0);
 
             spacemouse_device_close(mon_mouse);
           }
