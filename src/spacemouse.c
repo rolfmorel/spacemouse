@@ -593,6 +593,8 @@ int run_event_command(int argc, char **argv)
               } else if (mouse_event.type == SPACEMOUSE_EVENT_BUTTON)
                 printf("button: %d %s\n", mouse_event.button.bnum,
                        mouse_event.button.press ? "press" : "release");
+              else if (mouse_event.type == SPACEMOUSE_EVENT_LED)
+                printf("led: %s\n", mouse_event.led.state ? "on" : "off");
             }
           break;
           }
