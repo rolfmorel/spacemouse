@@ -27,7 +27,7 @@ along with spacemouse-utils.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <libspacemouse.h>
 
-int main()
+int main(int argc, char **argv)
 {
   struct spacemouse *iter;
 
@@ -43,8 +43,8 @@ int main()
     printf("  product: %s\n", spacemouse_device_get_product(iter));
 
     if (spacemouse_device_open(iter) == -1)
-      fprintf(stderr, "failed to open device: %s\n",
-              spacemouse_device_get_devnode(iter));
+      fprintf(stderr, "%s: failed to open device '%s': %s\n", *argv,
+              spacemouse_device_get_devnode(iter), strerror(errno));
     else
       spacemouse_device_set_led(iter, 1);
   }
@@ -76,8 +76,8 @@ int main()
         printf("Device added, ");
 
         if (spacemouse_device_open(mon_mouse) == -1)
-          fprintf(stderr, "failed to open device: %s\n",
-                  spacemouse_device_get_devnode(iter));
+          fprintf(stderr, "%s: failed to open device '%s': %s\n", *argv,
+                  spacemouse_device_get_devnode(iter), strerror(errno));
         else
           spacemouse_device_set_led(mon_mouse, 1);
       } else if (action == SPACEMOUSE_ACTION_REMOVE) {
