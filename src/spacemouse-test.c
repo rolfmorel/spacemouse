@@ -31,20 +31,22 @@ int main(int argc, char **argv)
 {
   struct spacemouse *iter;
 
-  int monitor_fd = spacemouse_monitor_open();
+  int err, monitor_fd = spacemouse_monitor_open();
 
-  if (spacemouse_device_list_update() == NULL)
+  err = spacemouse_device_list(&iter, 1);
+  /* TODO: add error check */
+  if (iter == NULL)
     printf("No devices found.\n");
 
-  spacemouse_device_list_foreach(iter, spacemouse_device_list()) {
+  spacemouse_device_list_foreach(iter, iter) {
     printf("device id: %d\n", spacemouse_device_get_id(iter));
     printf("  devnode: %s\n", spacemouse_device_get_devnode(iter));
     printf("  manufacturer: %s\n", spacemouse_device_get_manufacturer(iter));
     printf("  product: %s\n", spacemouse_device_get_product(iter));
 
-    if (spacemouse_device_open(iter) == -1)
+    if ((err = spacemouse_device_open(iter)) < 0)
       fprintf(stderr, "%s: failed to open device '%s': %s\n", *argv,
-              spacemouse_device_get_devnode(iter), strerror(errno));
+              spacemouse_device_get_devnode(iter), strerror(-err));
     else
       spacemouse_device_set_led(iter, 1);
   }
@@ -56,7 +58,9 @@ int main(int argc, char **argv)
     FD_SET(monitor_fd, &fds);
     int mouse_fd, max_fd = monitor_fd;
 
-    spacemouse_device_list_foreach(iter, spacemouse_device_list())
+    err = spacemouse_device_list(&iter, 0);
+    /* TODO: add error check */
+    spacemouse_device_list_foreach(iter, iter)
       if ((mouse_fd = spacemouse_device_get_fd(iter)) > -1) {
         FD_SET(mouse_fd, &fds);
         if (mouse_fd > max_fd) max_fd = mouse_fd;
@@ -68,14 +72,14 @@ int main(int argc, char **argv)
     }
 
     if (FD_ISSET(monitor_fd, &fds)) {
-      int action;
+      struct spacemouse *mon_mouse;
 
-      struct spacemouse *mon_mouse = spacemouse_monitor(&action);
+      int action = spacemouse_monitor(&mon_mouse);
 
       if (action == SPACEMOUSE_ACTION_ADD) {
         printf("Device added, ");
 
-        if (spacemouse_device_open(mon_mouse) == -1)
+        if ((err = spacemouse_device_open(mon_mouse)) < 0)
           fprintf(stderr, "%s: failed to open device '%s': %s\n", *argv,
                   spacemouse_device_get_devnode(mon_mouse), strerror(-err));
         else
@@ -96,13 +100,16 @@ int main(int argc, char **argv)
       }
     }
 
-    spacemouse_device_list_foreach(iter, spacemouse_device_list()) {
+    err = spacemouse_device_list(&iter, 0);
+    /* TODO: add error check */
+    spacemouse_device_list_foreach(iter, iter) {
       mouse_fd = spacemouse_device_get_fd(iter);
       if (mouse_fd > -1 && FD_ISSET(mouse_fd, &fds)) {
-        spacemouse_event mouse_event = { 0 };
+        spacemouse_event_t mouse_event = { 0 };
 
         int read_event = spacemouse_device_read_event(iter, &mouse_event);
-        if (read_event == -1)
+        if (read_event < 0)
+          /* No need to handle error, monitor should handle removes */
           spacemouse_device_close(iter);
         else if (read_event == SPACEMOUSE_READ_SUCCESS) {
           printf("device id %d: ", spacemouse_device_get_id(iter));

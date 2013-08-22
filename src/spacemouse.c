@@ -24,7 +24,6 @@ along with spacemouse-utils.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <errno.h>
 #include <ctype.h>
 #include <sys/types.h>
 #include <regex.h>
@@ -254,10 +253,12 @@ int run_list_command(int argc, char **argv)
     return EXIT_FAILURE;
   }
 
-  int match;
-
+  int match, err;
   struct spacemouse *iter;
-  spacemouse_device_list_foreach(iter, spacemouse_device_list_update())
+
+  err = spacemouse_device_list(&iter, 1);
+  /* TODO: add error check */
+  spacemouse_device_list_foreach(iter, iter)
     if ((match = match_device(iter)) == -1) {
       fprintf(stderr, "%s: failed to use regex, please use valid ERE\n",
               *argv);
@@ -331,9 +332,12 @@ int run_led_command(int argc, char **argv)
     return EXIT_FAILURE;
   }
 
-  int match;
+  int match, err;
   struct spacemouse *iter;
-  spacemouse_device_list_foreach(iter, spacemouse_device_list_update()) {
+
+  err = spacemouse_device_list(&iter, 1);
+  /* TODO: add error check */
+  spacemouse_device_list_foreach(iter, iter) {
     if ((match = match_device(iter)) == -1) {
       fprintf(stderr, "%s: failed to use regex, please use valid ERE\n",
               *argv);
@@ -341,17 +345,16 @@ int run_led_command(int argc, char **argv)
     } else if (match) {
       int led_state = -1;
 
-      if (spacemouse_device_open(iter) == -1) {
+      if ((err = spacemouse_device_open(iter)) < 0) {
         fprintf(stderr, "%s: failed to open device '%s': %s\n", *argv,
-                spacemouse_device_get_devnode(iter), strerror(errno));
+                spacemouse_device_get_devnode(iter), strerror(-err));
         return EXIT_FAILURE;
       }
 
       if (state_arg == LED_NONE || state_arg == LED_SWITCH) {
-        led_state = spacemouse_device_get_led(iter);
-        if (led_state == -1) {
+        if ((led_state = spacemouse_device_get_led(iter)) < 0) {
           fprintf(stderr, "%s: failed to get led state for '%s': %s\n", *argv,
-                  spacemouse_device_get_devnode(iter), strerror(errno));
+                  spacemouse_device_get_devnode(iter), strerror(-led_state));
           return EXIT_FAILURE;
         }
       }
@@ -364,9 +367,9 @@ int run_led_command(int argc, char **argv)
 
         if (state_arg == LED_SWITCH)
           state = !led_state;
-        if (spacemouse_device_set_led(iter, state) != 0) {
-          fprintf(stderr, "%s: failed to set led state for '%s'\n", *argv,
-                  spacemouse_device_get_devnode(iter));
+        if ((err = spacemouse_device_set_led(iter, state)) < 0) {
+          fprintf(stderr, "%s: failed to set led state for '%s': %s\n", *argv,
+                  spacemouse_device_get_devnode(iter), strerror(-err));
           return EXIT_FAILURE;
         }
         if (state_arg == LED_SWITCH) {
@@ -450,24 +453,26 @@ int run_event_command(int argc, char **argv)
                                   };
 #endif
 
-  int match, monitor_fd = spacemouse_monitor_open();
-
+  int match, err, monitor_fd = spacemouse_monitor_open();
   struct spacemouse *iter;
-  spacemouse_device_list_foreach(iter, spacemouse_device_list_update()) {
+
+  err = spacemouse_device_list(&iter, 1);
+  /* TODO: add error check */
+  spacemouse_device_list_foreach(iter, iter) {
     if ((match = match_device(iter)) == -1) {
       fprintf(stderr, "%s: failed to use regex, please use valid ERE\n",
               *argv);
       return EXIT_FAILURE;
     } else if (match) {
-      if (spacemouse_device_open(iter) == -1) {
+      if ((err = spacemouse_device_open(iter)) < 0) {
         fprintf(stderr, "%s: failed to open device '%s': %s\n", *argv,
-                spacemouse_device_get_devnode(iter), strerror(errno));
+                spacemouse_device_get_devnode(iter), strerror(-err));
         return EXIT_FAILURE;
       }
 
-      if (grab_opt && spacemouse_device_set_grab(iter, 1) != 0) {
+      if (grab_opt && (err = spacemouse_device_set_grab(iter, 1)) < 0) {
         fprintf(stderr, "%s: failed to grab device '%s': %s\n", *argv,
-                spacemouse_device_get_devnode(iter), strerror(errno));
+                spacemouse_device_get_devnode(iter), strerror(-err));
         return EXIT_FAILURE;
       }
     }
@@ -479,9 +484,11 @@ int run_event_command(int argc, char **argv)
   setvbuf(stdout, NULL, _IOLBF, 0);
 
   while(true) {
-    int mouse_fd, fds_idx = 0;
+    int mouse_fd, err, fds_idx = 0;
 
-    spacemouse_device_list_foreach(iter, spacemouse_device_list())
+    err = spacemouse_device_list(&iter, 0);
+    /* TODO: add error check */
+    spacemouse_device_list_foreach(iter, iter)
       if (spacemouse_device_get_fd(iter) > -1)
         fds_idx++;
 
@@ -494,7 +501,9 @@ int run_event_command(int argc, char **argv)
     fds[fds_idx].fd = monitor_fd;
     fds[fds_idx++].events = POLLIN;
 
-    spacemouse_device_list_foreach(iter, spacemouse_device_list())
+    err = spacemouse_device_list(&iter, 0);
+    /* TODO: add error check */
+    spacemouse_device_list_foreach(iter, iter)
       if ((mouse_fd = spacemouse_device_get_fd(iter)) > -1) {
         fds[fds_idx].fd = mouse_fd;
         fds[fds_idx++].events = POLLIN;
@@ -502,7 +511,8 @@ int run_event_command(int argc, char **argv)
 
     poll(fds, fds_idx, -1);
 
-    iter = spacemouse_device_list();
+    err = spacemouse_device_list(&iter, 0);
+    /* TODO: add error check */
 
     for (int n = 0; n < fds_idx; n++) {
       if (fds[n].revents == 0)
@@ -511,22 +521,23 @@ int run_event_command(int argc, char **argv)
       if (fds[n].fd == STDOUT_FILENO && fds[n].revents & POLLERR)
         return EXIT_ERROR;
       else if (fds[n].fd == monitor_fd) {
-        int action;
-        struct spacemouse *mon_mouse = spacemouse_monitor(&action);
+        struct spacemouse *mon_mouse;
+        int action = spacemouse_monitor(&mon_mouse);
 
         if (action == SPACEMOUSE_ACTION_ADD) {
           if (match_device(mon_mouse)) {
-            if (spacemouse_device_open(mon_mouse) == -1) {
+            if ((err = spacemouse_device_open(iter)) < 0) {
               fprintf(stderr, "%s: failed to open device '%s': %s\n", *argv,
                       spacemouse_device_get_devnode(mon_mouse),
-                      strerror(errno));
+                      strerror(-err));
               return EXIT_FAILURE;
             }
 
-            if (grab_opt && spacemouse_device_set_grab(mon_mouse, 1) != 0) {
+            if (grab_opt && (err = spacemouse_device_set_grab(mon_mouse, 1))
+                < 0) {
               fprintf(stderr, "%s: failed to grab device '%s': %s\n", *argv,
                       spacemouse_device_get_devnode(mon_mouse),
-                      strerror(errno));
+                      strerror(-err));
               return EXIT_FAILURE;
             }
 
@@ -553,7 +564,7 @@ int run_event_command(int argc, char **argv)
         spacemouse_device_list_foreach(iter, iter) {
           mouse_fd = spacemouse_device_get_fd(iter);
           if (mouse_fd > -1 && fds[n].fd == mouse_fd) {
-            spacemouse_event mouse_event = { 0 };
+            spacemouse_event_t mouse_event = { 0 };
             int status = spacemouse_device_read_event(iter, &mouse_event);
 
             if (status == -1)
