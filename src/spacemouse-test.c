@@ -128,11 +128,9 @@ int main(int argc, char **argv)
             printf("got button %s event: b(%d)\n",
                    mouse_event.button.press ? "press" : "release",
                    mouse_event.button.bnum);
-          else if (mouse_event.type == SPACEMOUSE_EVENT_LED) {
-            printf("got led event: (%s)\n", mouse_event.led.state == 1 ?
+          else if (mouse_event.type == SPACEMOUSE_EVENT_LED)
+            printf("got led event: %s\n", mouse_event.led.state == 1 ?
                    "on" : "off");
-          }
-
         }
       }
     }
