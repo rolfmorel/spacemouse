@@ -112,7 +112,10 @@ int main(int argc, char **argv)
           /* No need to handle error, monitor should handle removes */
           spacemouse_device_close(iter);
         else if (read_event == SPACEMOUSE_READ_SUCCESS) {
-          printf("device id %d: ", spacemouse_device_get_id(iter));
+          /* Safe guard for new events which we don't know how to handle. */
+          if (mouse_event.type > -1 &&
+              mouse_event.type < (SPACEMOUSE_EVENT_LED + 1))
+            printf("device id %d: ", spacemouse_device_get_id(iter));
 
           if (mouse_event.type == SPACEMOUSE_EVENT_MOTION) {
             printf("got motion event: t(%d, %d, %d) ",
