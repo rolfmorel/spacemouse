@@ -21,7 +21,6 @@ along with spacemouse-utils.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <string.h>
 #include <stdio.h>
-#include <errno.h>
 #include <stdlib.h>
 #include <sys/select.h>
 
