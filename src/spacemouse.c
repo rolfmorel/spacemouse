@@ -46,10 +46,11 @@ enum {
   LIST_CMD = 1 << 1,
   LED_CMD = 1 << 2,
   EVENT_CMD = 1 << 3
-} command = NO_CMD;
+};
 
 bool multi_call = false, grab_opt = false;
 
+int command = NO_CMD;
 int regex_mask = REG_EXTENDED | REG_NOSUB;
 int deviation_opt = MIN_DEVIATION, events_opt = 0, millis_opt = 0;
 char const *dev_opt = NULL, *man_opt = NULL, *pro_opt = NULL;
