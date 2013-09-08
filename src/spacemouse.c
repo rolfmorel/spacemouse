@@ -144,6 +144,23 @@ int match_device(struct spacemouse *mouse)
   return !match;
 }
 
+int parse_substr_strs(char *substr, char **str_arr, int *val_arr) {
+  int ret = 0, i = -1, sub_len = strlen(substr);
+  char *str_iter;
+
+  while ((str_iter = str_arr[++i]) != NULL)
+    if (strncmp(substr, str_iter, sub_len) == 0) {
+      if (ret != 0)
+        ret = -2; // there already is a match, set err with number of matches
+      else if (ret < 0)
+        ret -= 1; // for every subsequent match increase err return count
+      else
+        ret = val_arr[i];
+    }
+
+  return ret;
+}
+
 int parse_arguments(int argc, char **argv, char const *opt_str,
                     struct option const *long_options)
 {
@@ -312,21 +329,19 @@ int run_led_command(int argc, char **argv)
   }
 
   if (optind == (argc - 1)) {
+    char *cmd_strs[] = { "on", "1", "off", "0", "switch", "!", NULL };
+    int cmd_vals[] = { LED_ON, LED_ON, LED_OFF, LED_OFF, LED_SWITCH,
+                       LED_SWITCH, 0};
     char *ptr;
+
     for (ptr = argv[optind]; *ptr != 0; ptr++)
       *ptr = tolower(*ptr);
 
-    if (strcmp(argv[optind], "on") == 0 || strcmp(argv[optind], "1") == 0)
-      state_arg = LED_ON;
-    else if (strcmp(argv[optind], "off") == 0 ||
-             strcmp(argv[optind], "0") == 0)
-      state_arg = LED_OFF;
-    else if (strcmp(argv[optind], "switch") == 0 ||
-             strcmp(argv[optind], "!") == 0)
-      state_arg = LED_SWITCH;
-    else {
-      fprintf(stderr, "%s: invalid non-option argument -- '%s', see '-h' "
-              "for help\n", *argv, argv[optind]);
+    state_arg = parse_substr_strs(argv[optind], cmd_strs, cmd_vals);
+
+    if (state_arg <= 0) {
+      fprintf(stderr, "%s: %s non-option argument '%s', see '-h' for help\n",
+              *argv, state_arg == 0 ? "invalid" : "ambiguous", argv[optind]);
       return EXIT_FAILURE;
     }
   } else if (optind != argc) {
@@ -366,10 +381,8 @@ int run_led_command(int argc, char **argv)
         printf("%s: %s\n", spacemouse_device_get_devnode(iter),
                led_state ? "on": "off");
       } else {
-        int state = state_arg;
+        int state = state_arg == LED_SWITCH ? !led_state : state_arg - 1;
 
-        if (state_arg == LED_SWITCH)
-          state = !led_state;
         if ((err = spacemouse_device_set_led(iter, state)) < 0) {
           fprintf(stderr, "%s: failed to set led state for '%s': %s\n", *argv,
                   spacemouse_device_get_devnode(iter), strerror(-err));
@@ -639,12 +652,17 @@ int main(int argc, char **argv)
       multi_call = true;
       command = EVENT_CMD;
     } else if (argc >= 2) {
-      if (strcmp(argv[1], "list") == 0)
-        command = LIST_CMD;
-      else if (strcmp(argv[1], "led") == 0)
-        command = LED_CMD;
-      else if (strcmp(argv[1], "event") == 0)
-        command = EVENT_CMD;
+      char *cmd_strs[] = { "list", "ls", "led", "event", NULL };
+      int cmd_vals[] = { LIST_CMD, LIST_CMD, LED_CMD, EVENT_CMD, 0 };
+
+      int cmd = parse_substr_strs(argv[1], cmd_strs, cmd_vals);
+
+      if (cmd < 0) {
+        fprintf(stderr, "%s: command argument '%s' was ambiguous\n", *argv,
+                argv[1]);
+        return 1;
+      } else if (cmd != 0)
+        command = cmd;
     }
   }
 
