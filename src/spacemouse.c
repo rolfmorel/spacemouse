@@ -276,11 +276,13 @@ int run_list_command(int argc, char **argv)
 int run_led_command(int argc, char **argv)
 {
   enum {
-    LED_NONE = -1,
+    LED_NONE = 0,
     LED_OFF,
     LED_ON,
     LED_SWITCH
-  } state_arg = LED_NONE;
+  };
+
+  int state_arg = LED_NONE;
 
   {
     char const help_led_cmd[] = \
