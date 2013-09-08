@@ -42,10 +42,10 @@ along with spacemouse-utils.  If not, see <http://www.gnu.org/licenses/>.
 #define N_EVENTS 16
 
 enum {
-  NO_CMD = 1,
-  LIST_CMD = 1 << 1,
-  LED_CMD = 1 << 2,
-  EVENT_CMD = 1 << 3
+  NO_CMD = 0,
+  LIST_CMD = 1,
+  LED_CMD = 1 << 1,
+  EVENT_CMD = 1 << 2
 };
 
 bool multi_call = false, grab_opt = false;
