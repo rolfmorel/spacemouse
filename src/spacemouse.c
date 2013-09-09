@@ -36,7 +36,8 @@ along with spacemouse-utils.  If not, see <http://www.gnu.org/licenses/>.
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
 
-#define EXIT_ERROR (EXIT_FAILURE + 1)
+// FreeBSD sysexits.h: An error occurred while doing I/O on some file.
+#define EX_IOERR 74
 
 #define MIN_DEVIATION 256
 #define N_EVENTS 16
@@ -531,7 +532,7 @@ int run_event_command(int argc, char **argv)
         continue;
 
       if (fds[n].fd == STDOUT_FILENO && fds[n].revents & POLLERR)
-        return EXIT_ERROR;
+        return EX_IOERR;
       else if (fds[n].fd == monitor_fd) {
         struct spacemouse *mon_mouse;
         int action = spacemouse_monitor(&mon_mouse);
