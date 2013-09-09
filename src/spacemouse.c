@@ -271,10 +271,8 @@ int run_list_command(int argc, char **argv)
     return EXIT_FAILURE;
   }
 
-  int match, err;
   struct spacemouse *iter;
-
-  err = spacemouse_device_list(&iter, 1);
+  int match, err = spacemouse_device_list(&iter, 1);
   /* TODO: add error check */
   spacemouse_device_list_foreach(iter, iter)
     if ((match = match_device(iter)) == -1) {
@@ -350,10 +348,8 @@ int run_led_command(int argc, char **argv)
     return EXIT_FAILURE;
   }
 
-  int match, err;
   struct spacemouse *iter;
-
-  err = spacemouse_device_list(&iter, 1);
+  int match, err = spacemouse_device_list(&iter, 1);
   /* TODO: add error check */
   spacemouse_device_list_foreach(iter, iter) {
     if ((match = match_device(iter)) == -1) {
