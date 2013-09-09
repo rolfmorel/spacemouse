@@ -658,7 +658,7 @@ int main(int argc, char **argv)
       int cmd = parse_substr_strs(argv[1], cmd_strs, cmd_vals);
 
       if (cmd < 0) {
-        fprintf(stderr, "%s: command argument '%s' was ambiguous\n", *argv,
+        fprintf(stderr, "%s: command argument '%s' is ambiguous\n", *argv,
                 argv[1]);
         return 1;
       } else if (cmd != 0)
