@@ -637,21 +637,21 @@ int run_event_command(int argc, char **argv)
 int main(int argc, char **argv)
 {
   {
-    int str_len = strlen(*argv);
+    char *exe_strs[] = { "spacemouse-list", "spacemouse-led",
+                         "spacemouse-event", NULL };
+    int exe_vals[] = { LIST_CMD, LED_CMD, EVENT_CMD, 0 };
+    int i = -1, arg_len = strlen(*argv);
 
-    if (str_len >= 15 &&
-        strcmp(*argv + (str_len - 15), "spacemouse-list") == 0) {
-      multi_call = true;
-      command = LIST_CMD;
-    } else if (str_len >= 14 &&
-               strcmp(*argv + (str_len - 14), "spacemouse-led") == 0) {
-      multi_call = true;
-      command = LED_CMD;
-    } else if (str_len >= 16 &&
-               strcmp(*argv + (str_len - 16), "spacemouse-event") == 0) {
-      multi_call = true;
-      command = EVENT_CMD;
-    } else if (argc >= 2) {
+    while (exe_strs[++i] != NULL) {
+      int exe_len = strlen(exe_strs[i]);
+      if (arg_len >= exe_len &&
+          strcmp(*argv + (arg_len - exe_len), exe_strs[i]) == 0) {
+        command = exe_vals[i];
+        multi_call = true;
+      }
+    }
+
+    if (!multi_call && argc >= 2) {
       char *cmd_strs[] = { "list", "ls", "led", "event", NULL };
       int cmd_vals[] = { LIST_CMD, LIST_CMD, LED_CMD, EVENT_CMD, 0 };
 
