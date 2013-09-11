@@ -145,9 +145,9 @@ int match_device(struct spacemouse *mouse)
   return !match;
 }
 
-int parse_substr_strs(char *substr, char **str_arr, int *val_arr) {
+int parse_substr_strs(char const *substr, char const **str_arr, int *val_arr) {
   int ret = 0, i = -1, sub_len = strlen(substr);
-  char *str_iter;
+  char const *str_iter;
 
   while ((str_iter = str_arr[++i]) != NULL)
     if (strncmp(substr, str_iter, sub_len) == 0) {
@@ -328,7 +328,7 @@ int run_led_command(int argc, char **argv)
   }
 
   if (optind == (argc - 1)) {
-    char *cmd_strs[] = { "on", "1", "off", "0", "switch", "!", NULL };
+    char const *cmd_strs[] = { "on", "1", "off", "0", "switch", "!", NULL };
     int cmd_vals[] = { LED_ON, LED_ON, LED_OFF, LED_OFF, LED_SWITCH,
                        LED_SWITCH, 0};
     char *ptr;
@@ -634,8 +634,8 @@ int run_event_command(int argc, char **argv)
 int main(int argc, char **argv)
 {
   {
-    char *exe_strs[] = { "spacemouse-list", "spacemouse-led",
-                         "spacemouse-event", NULL };
+    char const *exe_strs[] = { "spacemouse-list", "spacemouse-led",
+                               "spacemouse-event", NULL };
     int exe_vals[] = { LIST_CMD, LED_CMD, EVENT_CMD, 0 };
     int i = -1, arg_len = strlen(*argv);
 
@@ -649,7 +649,7 @@ int main(int argc, char **argv)
     }
 
     if (!multi_call && argc >= 2) {
-      char *cmd_strs[] = { "list", "ls", "led", "event", NULL };
+      char const *cmd_strs[] = { "list", "ls", "led", "event", NULL };
       int cmd_vals[] = { LIST_CMD, LIST_CMD, LED_CMD, EVENT_CMD, 0 };
 
       int cmd = parse_substr_strs(argv[1], cmd_strs, cmd_vals);
