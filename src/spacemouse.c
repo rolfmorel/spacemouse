@@ -36,6 +36,8 @@ along with spacemouse-utils.  If not, see <http://www.gnu.org/licenses/>.
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
 
+#define ARRLEN(x) (sizeof x / sizeof *x)
+
 // FreeBSD sysexits.h: An error occurred while doing I/O on some file.
 #define EX_IOERR 74
 
