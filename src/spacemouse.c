@@ -159,7 +159,8 @@ int parse_substr_strs(char const *substr, char const **str_arr, int *val_arr) {
         ret -= 1; // for every subsequent match increase err return count
       else
         ret = val_arr[i];
-    }
+    } else
+      val_arr[i] = 0;
 
   return ret;
 }
@@ -341,8 +342,15 @@ int run_led_command(int argc, char **argv)
     state_arg = parse_substr_strs(argv[optind], cmd_strs, cmd_vals);
 
     if (state_arg <= 0) {
-      fprintf(stderr, "%s: %s non-option argument '%s', see '-h' for help\n",
-              *argv, state_arg == 0 ? "invalid" : "ambiguous", argv[optind]);
+      fprintf(stderr, "%s: non-option argument '%s' is %s", *argv,
+              argv[optind], state_arg == 0 ? "invalid, see '-h' for help\n":
+              "ambiguous; possibilities:");
+      if (state_arg < 0) {
+        for (int i = 0; i < ARRLEN(cmd_vals); i++)
+          if (cmd_vals[i] > 0 && cmd_strs[i] != NULL)
+            printf(" '%s'", cmd_strs[i]);
+        puts("");
+      }
       return EXIT_FAILURE;
     }
   } else if (optind != argc) {
@@ -657,8 +665,12 @@ int main(int argc, char **argv)
       int cmd = parse_substr_strs(argv[1], cmd_strs, cmd_vals);
 
       if (cmd < 0) {
-        fprintf(stderr, "%s: command argument '%s' is ambiguous\n", *argv,
+        fprintf(stderr, "%s: command '%s' is ambiguous; possibilities:", *argv,
                 argv[1]);
+        for (int i = 0; i < ARRLEN(cmd_vals); i++)
+          if (cmd_vals[i] > 0 && cmd_strs[i] != NULL)
+            printf(" '%s'", cmd_strs[i]);
+        puts("");
         return 1;
       } else if (cmd != 0)
         command = cmd;
