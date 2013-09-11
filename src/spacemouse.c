@@ -152,7 +152,7 @@ int parse_substr_strs(char const *substr, char const **str_arr, int *val_arr) {
 
   while (str_arr[++i] != NULL)
     if (strncmp(substr, str_arr[i], sub_len) == 0) {
-      if (ret != 0)
+      if (ret > 0)
         ret = -2; // there already is a match, set err with number of matches
       else if (ret < 0)
         ret -= 1; // for every subsequent match increase err return count
