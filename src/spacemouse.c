@@ -334,9 +334,8 @@ int run_led_command(int argc, char **argv)
     char const *cmd_strs[] = { "on", "1", "off", "0", "switch", "!", NULL };
     int cmd_vals[] = { LED_ON, LED_ON, LED_OFF, LED_OFF, LED_SWITCH,
                        LED_SWITCH, 0};
-    char *ptr;
 
-    for (ptr = argv[optind]; *ptr != 0; ptr++)
+    for (char *ptr = argv[optind]; *ptr != 0; ptr++)
       *ptr = tolower(*ptr);
 
     state_arg = parse_substr_strs(argv[optind], cmd_strs, cmd_vals);
