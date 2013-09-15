@@ -113,7 +113,7 @@ int main(int argc, char **argv)
         else if (read_event == SPACEMOUSE_READ_SUCCESS) {
           /* Safe guard for new events which we don't know how to handle. */
           if (mouse_event.type > -1 &&
-              mouse_event.type < (SPACEMOUSE_EVENT_LED + 1))
+              mouse_event.type <= SPACEMOUSE_EVENT_LED)
             printf("device id %d: ", spacemouse_device_get_id(iter));
 
           if (mouse_event.type == SPACEMOUSE_EVENT_MOTION) {
