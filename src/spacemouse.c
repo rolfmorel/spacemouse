@@ -547,7 +547,7 @@ int run_event_command(int argc, char **argv)
 
         if (action == SPACEMOUSE_ACTION_ADD) {
           if (match_device(mon_mouse)) {
-            if ((err = spacemouse_device_open(iter)) < 0) {
+            if ((err = spacemouse_device_open(mon_mouse)) < 0) {
               fprintf(stderr, "%s: failed to open device '%s': %s\n", *argv,
                       spacemouse_device_get_devnode(mon_mouse),
                       strerror(-err));
