@@ -93,8 +93,7 @@ char const help_common_opts[] = \
 "                             manufacturer string must match\n"
 "  -P, --product=PRO          regular expression (ERE) which devices'\n"
 "                             product string must match\n"
-"  -i, --ignore-case          makes regular expression matching case\n"
-"                             insensitive\n";
+"  -i, --ignore-case          case insensitive regex\n";
 
 char const help_event_opts[] = \
 "  -g, --grab                 grab matched/all devices\n"
