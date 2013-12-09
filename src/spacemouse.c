@@ -65,7 +65,7 @@ char const *dev_opt = NULL, *man_opt = NULL, *pro_opt = NULL;
     { "ignore-case", no_argument, NULL, 'i' }, \
     { "help", no_argument, NULL, 'h' },
 
-char const *opt_str_no_cmd = "d:m:p:ih";
+char const *opt_str_no_cmd = "D:M:P:ih";
 struct option const long_options_no_cmd[] = {
   COMMON_LONG_OPTIONS
   { 0, 0, 0, 0 }
@@ -87,25 +87,25 @@ char const help_no_cmd[] = \
 
 char const help_common_opts[] = \
 "Options:\n"
-"  -d, --devnode=DEV          regular expression (ERE) which devices'\n"
+"  -D, --devnode=DEV          regular expression (ERE) which devices'\n"
 "                             devnode string must match\n"
-"  -m, --manufacturer=MAN     regular expression (ERE) which devices'\n"
+"  -M, --manufacturer=MAN     regular expression (ERE) which devices'\n"
 "                             manufacturer string must match\n"
-"  -p, --product=PRO          regular expression (ERE) which devices'\n"
+"  -P, --product=PRO          regular expression (ERE) which devices'\n"
 "                             product string must match\n"
 "  -i, --ignore-case          makes regular expression matching case\n"
 "                             insensitive\n";
 
 char const help_event_opts[] = \
 "  -g, --grab                 grab matched/all devices\n"
-"  -D, --deviation=DEVIATION  minimum deviation on an motion axis needed\n"
+"  -d, --deviation=DEVIATION  minimum deviation on an motion axis needed\n"
 "                             to register as an event\n"
 "                             default is: " STR(MIN_DEVIATION) "\n"
 "  -n, --events=N             number of consecutive events for which\n"
 "                             deviaton must exceed minimum deviation before\n"
 "                             printing an event to stdout\n"
 "                             default is: " STR(N_EVENTS) "\n"
-"  -M, --millis=MILLISECONDS  millisecond period in which consecutive\n"
+"  -m, --millis=MILLISECONDS  millisecond period in which consecutive\n"
 "                             events' deviaton must exceed minimum deviation\n"
 "                             before printing an event to stdout\n";
 
@@ -175,15 +175,15 @@ int parse_arguments(int argc, char **argv, char const *opt_str,
   while ((c = getopt_long(argc, argv, opt_str, long_options, NULL)) != -1) {
     int tmp;
     switch (c) {
-      case 'd':
+      case 'D':
         dev_opt = optarg;
         break;
 
-      case 'm':
+      case 'M':
         man_opt = optarg;
         break;
 
-      case 'p':
+      case 'P':
         pro_opt = optarg;
         break;
 
@@ -195,7 +195,7 @@ int parse_arguments(int argc, char **argv, char const *opt_str,
         grab_opt = true;
         break;
 
-      case 'D':
+      case 'd':
         if ((tmp = atoi(optarg)) < 1) {
           fprintf(stderr, "%s: option '--deviation' needs to be a valid "
                   "positive integer\n", *argv);
@@ -213,7 +213,7 @@ int parse_arguments(int argc, char **argv, char const *opt_str,
           events_opt = tmp;
         break;
 
-      case 'M':
+      case 'm':
         if ((tmp = atoi(optarg)) < 1) {
           fprintf(stderr, "%s: option '--millis' needs to be a valid "
                   "positive integer, in milliseconds\n", *argv);
@@ -416,7 +416,7 @@ int run_event_command(int argc, char **argv)
   };
 
   {
-    char const *opt_str_event_cmd = "d:m:p:igD:n:M:h";
+    char const *opt_str_event_cmd = "D:M:P:igd:n:m:h";
     struct option const long_options_event_cmd[] = {
       COMMON_LONG_OPTIONS
       { "grab", no_argument, NULL, 'g'},
