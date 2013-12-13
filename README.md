@@ -1,9 +1,9 @@
-# spacemouse-utils
-A collection of simple utilies for 3D/6DoF input devices.
+# spacemouse
+A command-line utility for 3D/6DoF input devices.
 
-Simple programs for:
+With commands for:
 * retrieving information about connected 6DoF devices
-* retrieving and setting/switching the LED state of connected 6DoF devices
+* retrieving, setting and switching the LED state of connected 6DoF devices
 * recieving events on connected 6DoF devices (device, motion and button events)
 * testing/debugging (of libspacemouse)
 
@@ -15,7 +15,7 @@ Simple programs for:
 
 ## Usage
 
-    $ spacemouse-list
+    $ spm list
     devnode: /dev/input/event4
     manufacturer: 3Dconnexion
     product: SpaceNavigator
@@ -25,16 +25,16 @@ Simple programs for:
     product: SpaceExplorer
 
 - - - - -
-    $ spacemouse-led
+    $ spm led
     /dev/input/event4: off
     /dev/input/event0: off
 - - - - -
-    $ spacemouse-led on
+    $ spm led on
 - - - - -
-    $ spacemouse-led -d /dev/input/event4 switch
+    $ spm led --devnode /dev/input/event4 switch
     /dev/input/event4: switched off
 - - - - -
-    $ spacemouse-event
+    $ spm event
     motion: forward
     motion: forward
     motion: right
@@ -50,7 +50,7 @@ Simple programs for:
     button: 0 release
     ...
 - - - - -
-    $ spacemouse-test
+    $ spm raw
     device id: 1
       devnode: /dev/input/event4
       manufacturer: 3Dconnexion
@@ -81,32 +81,21 @@ Simple programs for:
 
 ### Compile and install
 
-    ./configure
     make
     sudo make install
 
 ### Uninstall
-
-after at least `./configure` has run
 
     sudo make uninstall
 
 ## Examples
 
 * cli examples:<br>
-    some examples of how the different programs can be used, including selecting devices, led switching in a loop and filtering of events
+    some examples of how the different commands can be used, including selecting devices, led switching in a loop and filtering of events
 
 * simple led deamon:<br>
     simple script for turning the LED on on device connect
 
 * simple key map:<br>
     script for mapping events to keys with xdotool, for example: scrolling, zooming and killing applications
-
-## Implementation
-
-The `spacemouse-list`, `spacemouse-led` and `spacemouse-event` programs are actually symbolic links to the multi-call `spacemouse` binary.
-
-The `spacemouse` program can also be called directly and use a command argument to specify which operations it should undertake: `list`, `led` and `event`. These commands take the same arguments as there symbolic link counter parts. When the `spacemouse` program is called without a command it defaults to the `list` command.
-
-Use `-h/--help` for more information on the options and arguments the spacemouse program and it's symbolic links take.
 
