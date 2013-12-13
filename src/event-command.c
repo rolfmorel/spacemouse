@@ -6,8 +6,6 @@
 #include <ctype.h>
 #include <poll.h>
 
-#include <errno.h>
-
 #include <libspacemouse.h>
 
 #include "options.h"
