@@ -2,15 +2,15 @@
 
 export PATH="$( cd "$( dirname "$( dirname "$0" )" )" && pwd ):$PATH"
 
-spacemouse-event | {
+spm event | {
     while read EVENT; do
         if ! grep -q 'device: ' <<<"${EVENT}"; then
             continue
         fi
         device=$(sed -rn 's/device: ([^ ]*?) .*/\1/p' <<<"${EVENT}")
         if ! grep -q 'disconnect'<<<"${EVENT}"; then
-            echo "spacemouse-led -d ${device} on"
-            spacemouse-led -d "${device}" on
+            echo "spm led -D ${device} on"
+            spm led -D "${device}" on
         fi
     done
 }

@@ -4,73 +4,73 @@ set -v
 export PATH="$( cd "$( dirname "$( dirname "$0" )" )" && pwd ):$PATH"
 
 # list all devices
-spacemouse-list
+spm list # or just 'spm'
 
 # count devices
-spacemouse-list | grep -cx '^$'
+spm list | grep -cx '^$'
 
 # first device info
-spacemouse-list | awk '{if(NF==0){n++}else if(n==0)print}'
-# second device info
-spacemouse-list | awk '{if(NF==0){n++}else if(n==1)print}'
+spm list | awk '{if(NF==0){n++}else if(n==0)print}'
+# second device info (with 'ls' as alias for 'list')
+spm ls | awk '{if(NF==0){n++}else if(n==1)print}'
 
-# get devnodes for all devices
-spacemouse-list | sed -n 's/devnode: //p'
+# get devnodes for all devices (spm defaults to 'list' without a command)
+spm | sed -n 's/devnode: //p'
 
 # get device node of first device
-spacemouse-list | sed -n 's/devnode: //p' | head -1
+spm | sed -n 's/devnode: //p' | head -1
 # or
-spacemouse-list | sed -n 's/devnode: //p;q'
+spm | sed -n 's/devnode: //p;q'
 
 # get device node of second device
-spacemouse-list | sed -n 's/devnode: //p' | head -2 | tail -1
+spm | sed -n 's/devnode: //p' | head -2 | tail -1
 # or
-spacemouse-list | awk '{if(NF==0){n++}else if(n==1)print}' | sed -n 's/devnode: //p'
+spm | awk '{if(NF==0){n++}else if(n==1)print}' | sed -n 's/devnode: //p'
 
 
 # set LED of only the first device to on
-spacemouse-led -d $(spacemouse-list | sed -n 's/devnode: //p;q') on
+spm led --devnode $(spm list | sed -n 's/devnode: //p;q') on
 
-# switch LED state of only the first device
-spacemouse-led -d $(spacemouse-list | sed -n 's/devnode: //p;q') switch
+# switch LED state of only the first device (short option of '--devnode' is '-D')
+spm led -D $(spm list | sed -n 's/devnode: //p;q') switch
 
 # switch LED state of each device with a delay in between, 5 times
 for (( n = 0; n < 5; n++ )); do
-    for devnode in $(spacemouse-list | sed -n 's/devnode: //p'); do
+    for devnode in $(spm list | sed -n 's/devnode: //p'); do
         sleep 0.5
-        spacemouse-led -d "$devnode" switch
+        spm led --devnode "$devnode" switch
     done
 done
 
 
 # return only one event
-spacemouse-event | head -1
+spm event | head -1
 
 # return 9th and 10th event
-spacemouse-event | head -10 | tail -2
+spm event | head -10 | tail -2
 
 # return only the first button press (Not all programs react on a broken pipe
 # immediately, but only react to an error when trying to read/write. That means
 # that some programs only return when an error occurs on writing the next event)
-spacemouse-event | sed -urn 's/button: ([0-9]+) press/\1/p' | head -1
+spm event | sed -urn 's/button: ([0-9]+) press/\1/p' | head -1
 # or (telling sed to quit thus close the pipe immediately, does work)
-spacemouse-event | sed -urn 's/button: ([0-9]+) press/\1/p;q'
+spm event | sed -urn 's/button: ([0-9]+) press/\1/p;q'
 # or first five (telling awk to quit, uses stdbuf for setting unbuffered)
-spacemouse-event | stdbuf -o0 awk '{if($1=="button:"&&$3=="press"){print $2;n++}if(n==5)exit}'
+spm event | stdbuf -o0 awk '{if($1=="button:"&&$3=="press"){print $2;n++}if(n==5)exit}'
 
 # only return button number on button press events (remove 'head' for uninterrupted
 # stream)
-spacemouse-event | sed -urn 's/button: ([0-9]+) press/\1/p' | head
+spm event | sed -urn 's/button: ([0-9]+) press/\1/p' | head
 # or
-spacemouse-event | grep -Eo --line-buffered -o '[0-9]+ press' | stdbuf -o0 cut -d ' ' -f 1 | head
+spm event | grep -Eo --line-buffered -o '[0-9]+ press' | stdbuf -o0 cut -d ' ' -f 1 | head
 
-# for all connected devices run a seperate spacemouse-event and return only the
+# for all connected devices run a seperate spm event and return only the
 # first event for each device
-for devnode in $(spacemouse-list | sed -n 's/devnode: //p'); do
-    spacemouse-event -d "$devnode" | head -1 &
+for devnode in $(spm list | sed -n 's/devnode: //p'); do
+    spm event -D "$devnode" | head -1 &
 done
 
-sleep 2
+wait
 
-# make spacemouse-event very sensitive and print only the first hunderd events
-spacemouse-event -D 96 -M 32 | head -100
+# make spm event very sensitive and print only the first hunderd events
+spm event  --deviation 96 --milliseconds 32 | head -100

@@ -4,7 +4,7 @@ export PATH="$( cd "$( dirname "$( dirname "$0" )" )" && pwd ):$PATH"
 
 button_pressed=(0 0)
 ignore_release=(0 0)
-spacemouse-event | {
+spm event | {
     while read EVENT; do
         EVENT=$(echo ${EVENT} | sed -urn 's/(motion|button): //p')
         case "$EVENT" in
@@ -42,7 +42,7 @@ spacemouse-event | {
 
             '0 release')
                 if [[ ${ignore_release[0]} = 0 ]]; then
-                    spacemouse-led switch
+                    spm led switch
                 fi
                 button_pressed[0]=0
                 ignore_release[0]=0
