@@ -67,8 +67,8 @@ parse_arguments(char const *progname, int nargs, char **args)
   return action;
 }
 
-int led_command(char const *progname, options_t *options, int nargs,
-                char **args)
+int
+led_command(char const *progname, options_t *options, int nargs, char **args)
 {
   action_t action = parse_arguments(progname, nargs, args);
 

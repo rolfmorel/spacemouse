@@ -12,12 +12,15 @@
 #define EX_IOERR 74
 
 /* fprintf to stderr */
-void warn(char const *format, ...);
+void
+warn(char const *format, ...);
 
 /* fprintf to stderr and exit failure */
-void fail(char const *format, ...);
+void
+fail(char const *format, ...);
 
-int match_device(struct spacemouse *mouse, char const *dev_re,
-                 char const *man_re, char const *pro_re, bool case_sensitive);
+int
+match_device(struct spacemouse *mouse, char const *dev_re, char const *man_re,
+             char const *pro_re, bool case_sensitive);
 
 #endif /* #ifndef _UTIL_H_ */

@@ -27,6 +27,7 @@ typedef struct
                                (options).events = 0; \
                                (options).milliseconds = 0;
 
-int parse_options(int argc, char **argv, options_t *options, cmd_t cmd);
+int
+parse_options(int argc, char **argv, options_t *options, cmd_t cmd);
 
 #endif /* #ifndef _OPTIONS_HDR_ */

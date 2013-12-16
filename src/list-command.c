@@ -11,8 +11,8 @@
 
 #include "commands.h"
 
-int list_command(char const *progname, options_t *options, int nargs,
-                 char **args)
+int
+list_command(char const *progname, options_t *options, int nargs, char **args)
 {
   if (nargs)
     fail("%s: invalid non-command or non-option argument(s), use the "

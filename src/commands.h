@@ -11,17 +11,18 @@ typedef enum {
 
 #include "options.h"
 
-int list_command(char const *progname, options_t *options, int nargs,
-                 char **args);
+int
+list_command(char const *progname, options_t *options, int nargs, char **args);
 
-int led_command(char const *progname, options_t *options, int nargs,
-                char **args);
+int
+led_command(char const *progname, options_t *options, int nargs, char **args);
 
-int event_command(char const *progname, options_t *options, int nargs,
-                 char **args);
+int
+event_command(char const *progname, options_t *options, int nargs,
+              char **args);
 
-int raw_command(char const *progname, options_t *options, int nargs,
-                 char **args);
+int
+raw_command(char const *progname, options_t *options, int nargs, char **args);
 
 /* event command specific */
 

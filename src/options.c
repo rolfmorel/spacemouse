@@ -49,7 +49,8 @@ static char const help_message[] = \
 "                             before printing an event to stdout";
 
 
-int parse_options(int argc, char **argv, options_t *options, cmd_t cmd)
+int
+parse_options(int argc, char **argv, options_t *options, cmd_t cmd)
 {
   int c;
 

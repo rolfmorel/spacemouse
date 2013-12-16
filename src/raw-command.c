@@ -13,8 +13,8 @@
 
 #include "commands.h"
 
-int raw_command(char const *progname, options_t *options, int nargs,
-                char **args)
+int
+raw_command(char const *progname, options_t *options, int nargs, char **args)
 {
   struct spacemouse *head, *iter;
   int monitor_fd, err;

@@ -7,7 +7,8 @@
 
 #include "util.h"
 
-void warn(char const *format, ...)
+void
+warn(char const *format, ...)
 {
     va_list ap;
     va_start(ap, format);
@@ -17,7 +18,8 @@ void warn(char const *format, ...)
     va_end(ap);
 }
 
-void fail(char const *format, ...)
+void
+fail(char const *format, ...)
 {
     va_list ap;
     va_start(ap, format);
@@ -29,7 +31,8 @@ void fail(char const *format, ...)
     exit(EXIT_FAILURE);
 }
 
-int run_regex(char const *regex, char const *string, bool case_sensitive)
+int
+run_regex(char const *regex, char const *string, bool case_sensitive)
 {
   regex_t preg;
   int ret, cflags = REG_EXTENDED | REG_NOSUB | case_sensitive ? REG_ICASE : 0;
@@ -44,8 +47,9 @@ int run_regex(char const *regex, char const *string, bool case_sensitive)
   return ret;
 }
 
-int match_device(struct spacemouse *mouse, char const *dev_re,
-                 char const *man_re, char const *pro_re, bool case_sensitive)
+int
+match_device(struct spacemouse *mouse, char const *dev_re, char const *man_re,
+             char const *pro_re, bool case_sensitive)
 {
   int match = 0;
   char const *strs[] = { dev_re, man_re, pro_re };

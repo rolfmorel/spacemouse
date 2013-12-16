@@ -13,8 +13,8 @@
 
 #include "commands.h"
 
-int event_command(char const *progname, options_t *options, int nargs,
-                char **args)
+int
+event_command(char const *progname, options_t *options, int nargs, char **args)
 {
   struct axis_event {
     unsigned int pos;

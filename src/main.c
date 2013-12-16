@@ -8,7 +8,8 @@
 #include "commands.h"
 #include "options.h"
 
-int main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {
   cmd_t command = NO_CMD;
   size_t cmd_matches = 0;
