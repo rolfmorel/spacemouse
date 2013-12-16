@@ -23,13 +23,9 @@ int event_command(char const *progname, options_t *options, int nargs,
     char const * neg_str;
   };
 
-  if (nargs) {
-    fprintf(stderr, "%s: invalid non-command or non-option argument(s), use "
-            "the '-h'/'--help' option to display the help message\n",
-            progname);
-
-    exit(EXIT_FAILURE);
-  }
+  if (nargs)
+    fail("%s: invalid non-command or non-option argument(s), use the "
+         "'-h'/'--help' option to display the help message\n", progname);
 
   if (options->deviation == 0)
     options->deviation = MIN_DEVIATION;
@@ -64,10 +60,8 @@ int event_command(char const *progname, options_t *options, int nargs,
 
     if (err) {
       /* TODO: better message */
-      fprintf(stderr, "%s: spacemouse_device_list() returned error '%d'\n",
-              progname, err);
-
-      exit(EXIT_FAILURE);
+      fail("%s: spacemouse_device_list() returned error '%d'\n", progname,
+           err);
     }
 
     spacemouse_device_list_foreach(iter, head) {
@@ -75,24 +69,15 @@ int event_command(char const *progname, options_t *options, int nargs,
                                options->pro_re, options->re_ignore_case);
 
       if (match == -1) {
-        fprintf(stderr, "%s: failed to use regex, please use valid ERE\n",
-                progname);
-
-        exit(EXIT_FAILURE);
+        fail("%s: failed to use regex, please use valid ERE\n", progname);
       } else if (match) {
-        if ((err = spacemouse_device_open(iter)) < 0) {
-          fprintf(stderr, "%s: failed to open device '%s': %s\n", progname,
-                  spacemouse_device_get_devnode(iter), strerror(-err));
+        if ((err = spacemouse_device_open(iter)) < 0)
+          fail("%s: failed to open device '%s': %s\n", progname,
+               spacemouse_device_get_devnode(iter), strerror(-err));
 
-          exit(EXIT_FAILURE);
-        }
-
-        if (options->grab && (err = spacemouse_device_set_grab(iter, 1)) < 0) {
-          fprintf(stderr, "%s: failed to grab device '%s': %s\n", progname,
-                  spacemouse_device_get_devnode(iter), strerror(-err));
-
-          exit(EXIT_FAILURE);
-        }
+        if (options->grab && (err = spacemouse_device_set_grab(iter, 1)) < 0)
+          fail("%s: failed to grab device '%s': %s\n", progname,
+               spacemouse_device_get_devnode(iter), strerror(-err));
       }
     }
   }
@@ -110,10 +95,8 @@ int event_command(char const *progname, options_t *options, int nargs,
 
     if (err) {
       /* TODO: better message */
-      fprintf(stderr, "%s: spacemouse_device_list() returned error '%d'\n",
-              progname, err);
-
-      exit(EXIT_FAILURE);
+      fail("%s: spacemouse_device_list() returned error '%d'\n", progname,
+           err);
     }
 
     spacemouse_device_list_foreach(iter, head) {
@@ -155,22 +138,14 @@ int event_command(char const *progname, options_t *options, int nargs,
                                    options->pro_re, options->re_ignore_case);
 
           if (match) {
-            if ((err = spacemouse_device_open(mon_mouse)) < 0) {
-              fprintf(stderr, "%s: failed to open device '%s': %s\n", progname,
-                      spacemouse_device_get_devnode(mon_mouse),
-                      strerror(-err));
-
-              exit(EXIT_FAILURE);
-            }
+            if ((err = spacemouse_device_open(mon_mouse)) < 0)
+              fail("%s: failed to open device '%s': %s\n", progname,
+                   spacemouse_device_get_devnode(iter), strerror(-err));
 
             if (options->grab &&
-                (err = spacemouse_device_set_grab(mon_mouse, 1)) < 0) {
-              fprintf(stderr, "%s: failed to grab device '%s': %s\n", progname,
-                      spacemouse_device_get_devnode(mon_mouse),
-                      strerror(-err));
-
-              exit(EXIT_FAILURE);
-            }
+                (err = spacemouse_device_set_grab(mon_mouse, 1)) < 0)
+              fail("%s: failed to grab device '%s': %s\n", progname,
+                   spacemouse_device_get_devnode(mon_mouse), strerror(-err));
 
             printf("device: %s %s %s connect\n",
                    spacemouse_device_get_devnode(mon_mouse),

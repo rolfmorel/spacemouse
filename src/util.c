@@ -1,9 +1,33 @@
 #include <stdbool.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <sys/types.h>
+#include <stdarg.h>
 #include <regex.h>
 
 #include "util.h"
+
+void warn(char const *format, ...)
+{
+    va_list ap;
+    va_start(ap, format);
+
+    vfprintf(stderr, format, ap);
+
+    va_end(ap);
+}
+
+void fail(char const *format, ...)
+{
+    va_list ap;
+    va_start(ap, format);
+
+    vfprintf(stderr, format, ap);
+
+    va_end(ap);
+
+    exit(EXIT_FAILURE);
+}
 
 int run_regex(char const *regex, char const *string, bool case_sensitive)
 {

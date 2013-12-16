@@ -100,32 +100,26 @@ int parse_options(int argc, char **argv, options_t *options, cmd_t cmd)
         break;
 
       case 'd':
-        if ((tmp = atoi(optarg)) < 1) {
-          fprintf(stderr, "%s: '-d'/'--deviation' option's argument needs to "
-                  "be a valid positive integer\n", argv[0]);
-
-          exit(EXIT_FAILURE);
-        } else
+        if ((tmp = atoi(optarg)) < 1)
+          fail("%s: '-d'/'--deviation' option's argument needs to be a valid "
+               "positive integer\n", argv[0]);
+        else
           options->deviation = tmp;
         break;
 
       case 'n':
-        if ((tmp = atoi(optarg)) < 1) {
-          fprintf(stderr, "%s: '-n'/'--events' option's argument needs to "
-                  "be a valid positive integer\n", argv[0]);
-
-          exit(EXIT_FAILURE);
-        } else
+        if ((tmp = atoi(optarg)) < 1)
+          fail("%s: '-n'/'--events' option's argument needs to be a valid "
+               "positive integer\n", argv[0]);
+        else
           options->events = tmp;
         break;
 
       case 'm':
-        if ((tmp = atoi(optarg)) < 1) {
-          fprintf(stderr, "%s: '-m'/'--milliseconds' option's argument needs "
-            "to be a valid positive integer\n", argv[0]);
-
-          exit(EXIT_FAILURE);
-        } else
+        if ((tmp = atoi(optarg)) < 1)
+          fail("%s: '-m'/'--milliseconds' option's argument needs to be a "
+               "valid positive integer\n", argv[0]);
+        else
           options->milliseconds = tmp;
         break;
 
@@ -137,12 +131,9 @@ int parse_options(int argc, char **argv, options_t *options, cmd_t cmd)
     }
   }
 
-  if (options->events != 0 && options->milliseconds != 0) {
-    fprintf(stderr, "%s: options '-n'/--events' and '-m'/--milliseconds' are "
-           "mutually exclusive\n", argv[0]);
-
-    exit(EXIT_FAILURE);
-  }
+  if (options->events != 0 && options->milliseconds != 0)
+    fail("%s: options '-n'/--events' and '-m'/--milliseconds' are mutually "
+         "exclusive\n", argv[0]);
 
   /* return number of arguments consumed */
   return optind;

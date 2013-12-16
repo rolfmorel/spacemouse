@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <errno.h>
 #include <sys/select.h>
 
 #include <libspacemouse.h>
@@ -18,23 +19,17 @@ int raw_command(char const *progname, options_t *options, int nargs,
   struct spacemouse *head, *iter;
   int monitor_fd, err;
 
-  if (nargs) {
-    fprintf(stderr, "%s: invalid non-command or non-option argument(s), use "
-            "the '-h'/'--help' option to display the help message\n",
-            progname);
+  if (nargs)
+    fail("%s: invalid non-command or non-option argument(s), use the "
+         "'-h'/'--help' option to display the help message\n", progname);
 
-    exit(EXIT_FAILURE);
-  }
 
   /* TODO: add error check */
   monitor_fd = spacemouse_monitor_open();
 
   if ((err = spacemouse_device_list(&head, 1)) != 0) {
     /* TODO: better message */
-    fprintf(stderr, "%s: spacemouse_device_list() returned error '%d'\n",
-            progname, err);
-
-    exit(EXIT_FAILURE);
+    fail("%s: spacemouse_device_list() returned error '%d'\n", progname, err);
   }
 
   if (head == NULL)
@@ -45,10 +40,7 @@ int raw_command(char const *progname, options_t *options, int nargs,
                              options->pro_re, options->re_ignore_case);
 
     if (match == -1) {
-      fprintf(stderr, "%s: failed to use regex, please use valid ERE\n",
-              progname);
-
-      exit(EXIT_FAILURE);
+      fail("%s: failed to use regex, please use valid ERE\n", progname);
     } else if (match) {
       printf("device id: %d\n"
              "  devnode: %s\n"
@@ -58,10 +50,9 @@ int raw_command(char const *progname, options_t *options, int nargs,
              spacemouse_device_get_manufacturer(iter),
              spacemouse_device_get_product(iter));
 
-      if ((err = spacemouse_device_open(iter)) < 0) {
-        fprintf(stderr, "%s: failed to open device '%s': %s\n", progname,
-                spacemouse_device_get_devnode(iter), strerror(-err));
-      }
+      if ((err = spacemouse_device_open(iter)) < 0)
+        fail("%s: failed to open device '%s': %s\n", progname,
+             spacemouse_device_get_devnode(iter), strerror(-err));
     }
   }
 
@@ -75,10 +66,8 @@ int raw_command(char const *progname, options_t *options, int nargs,
 
     if ((err = spacemouse_device_list(&head, 0)) != 0) {
       /* TODO: better message */
-      fprintf(stderr, "%s: spacemouse_device_list() returned error '%d'\n",
-              progname, err);
-
-      exit(EXIT_FAILURE);
+      fail("%s: spacemouse_device_list() returned error '%d'\n", progname,
+           err);
     }
 
     spacemouse_device_list_foreach(iter, head)
@@ -89,10 +78,8 @@ int raw_command(char const *progname, options_t *options, int nargs,
           max_fd = mouse_fd;
       }
 
-    if (select(max_fd + 1, &fds, NULL, NULL, NULL) == -1) {
-      perror("select");
-      break;
-    }
+    if (select(max_fd + 1, &fds, NULL, NULL, NULL) == -1)
+      fail("%s: select() error: %s", progname, strerror(errno));
 
     if (FD_ISSET(monitor_fd, &fds)) {
       struct spacemouse *mon_mouse;
@@ -107,8 +94,8 @@ int raw_command(char const *progname, options_t *options, int nargs,
           printf("Device added, ");
 
           if ((err = spacemouse_device_open(mon_mouse)) < 0)
-            fprintf(stderr, "%s: failed to open device '%s': %s\n", progname,
-                    spacemouse_device_get_devnode(mon_mouse), strerror(-err));
+            fail("%s: failed to open device '%s': %s\n", progname,
+                 spacemouse_device_get_devnode(mon_mouse), strerror(-err));
           else
             spacemouse_device_set_led(mon_mouse, 1);
         } else if (action == SPACEMOUSE_ACTION_REMOVE) {

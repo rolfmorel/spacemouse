@@ -46,28 +46,22 @@ parse_arguments(char const *progname, int nargs, char **args)
     }
 
     if (action_matches >= 2) {
-      fprintf(stderr, "%s: command '%s' is ambiguous; possibilities:",
-              progname, args[0]);
+      warn("%s: command '%s' is ambiguous; possibilities:", progname, args[0]);
 
       for (size_t action_idx = 0; action_idx < ARRLEN(actions); action_idx++) {
         if (actions[action_idx] != LED_NONE)
-          printf(" '%s'", action_strs[action_idx]);
+          warn(" '%s'", action_strs[action_idx]);
       }
-      puts(""); /* newline */
+      warn("\n");
 
       exit(EXIT_FAILURE);
     } else if (action == LED_NONE) {
-      fprintf(stderr, "%s: command argument '%s' is invalid, use "
-              "the '-h'/'--help' option to display the help message\n",
-              progname, args[0]);
-
-      exit(EXIT_FAILURE);
+      fail("%s: command argument '%s' is invalid, use the '-h'/'--help' "
+           "option to display the help message\n", progname, args[0]);
     }
   } else if (nargs) {
-    fprintf(stderr, "%s: expected zero or one non-option arguments, use "
-            "the '-h' option to display the help message\n", progname);
-
-    exit(EXIT_FAILURE);
+    fail("%s: expected zero or one non-option arguments, use the '-h' option "
+         "to display the help message\n", progname);
   }
 
   return action;
@@ -83,10 +77,7 @@ int led_command(char const *progname, options_t *options, int nargs,
 
   if (err) {
     /* TODO: better message */
-    fprintf(stderr, "%s: spacemouse_device_list() returned error '%d'\n",
-            progname, err);
-
-    exit(EXIT_FAILURE);
+    fail("%s: spacemouse_device_list() returned error '%d'\n", progname, err);
   }
 
   spacemouse_device_list_foreach(iter, head) {
@@ -94,28 +85,18 @@ int led_command(char const *progname, options_t *options, int nargs,
                              options->pro_re, options->re_ignore_case);
 
     if (match == -1) {
-      fprintf(stderr, "%s: failed to use regex, please use valid ERE\n",
-              progname);
-
-      exit(EXIT_FAILURE);
+      fail("%s: failed to use regex, please use valid ERE\n", progname);
     } else if (match) {
       int led_state = -1;
 
-      if ((err = spacemouse_device_open(iter)) < 0) {
-        fprintf(stderr, "%s: failed to open device '%s': %s\n", progname,
-                spacemouse_device_get_devnode(iter), strerror(-err));
-
-        exit(EXIT_FAILURE);
-      }
+      if ((err = spacemouse_device_open(iter)) < 0)
+        fail("%s: failed to open device '%s': %s\n", progname,
+             spacemouse_device_get_devnode(iter), strerror(-err));
 
       if (action == LED_NONE || action == LED_SWITCH) {
-        if ((led_state = spacemouse_device_get_led(iter)) < 0) {
-          fprintf(stderr, "%s: failed to get led state for '%s': %s\n",
-                  progname, spacemouse_device_get_devnode(iter),
-                  strerror(-led_state));
-
-          exit(EXIT_FAILURE);
-        }
+        if ((led_state = spacemouse_device_get_led(iter)) < 0)
+          fail("%s: failed to get led state for '%s': %s\n", progname,
+               spacemouse_device_get_devnode(iter), strerror(-led_state));
       }
 
       if (action == LED_NONE) {
@@ -131,13 +112,9 @@ int led_command(char const *progname, options_t *options, int nargs,
         else if (action == LED_SWITCH)
           new_state = !led_state;
 
-        if ((err = spacemouse_device_set_led(iter, new_state)) < 0) {
-          fprintf(stderr, "%s: failed to set led state for '%s': %s\n",
-                  progname, spacemouse_device_get_devnode(iter),
-                  strerror(-err));
-
-          exit(EXIT_FAILURE);
-        }
+        if ((err = spacemouse_device_set_led(iter, new_state)) < 0)
+          fail("%s: failed to set led state for '%s': %s\n", progname,
+               spacemouse_device_get_devnode(iter), strerror(-err));
 
         if (action == LED_SWITCH) {
           printf("%s: switched %s\n", spacemouse_device_get_devnode(iter),

@@ -30,14 +30,13 @@ int main(int argc, char **argv)
     }
 
     if (cmd_matches >= 2) {
-      fprintf(stderr, "%s: command '%s' is ambiguous; possibilities:", argv[0],
-              argv[1]);
+      warn("%s: command '%s' is ambiguous; possibilities:", argv[0], argv[1]);
 
       for (size_t cmd_idx = 0; cmd_idx < ARRLEN(cmds); cmd_idx++) {
           if (cmds[cmd_idx] != NO_CMD)
-            printf(" '%s'", cmd_strs[cmd_idx]);
+            warn(" '%s'", cmd_strs[cmd_idx]);
       }
-      puts(""); /* newline */
+      warn("\n");
 
       return EXIT_FAILURE;
     }
