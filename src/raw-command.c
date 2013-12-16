@@ -23,7 +23,6 @@ raw_command(char const *progname, options_t *options, int nargs, char **args)
     fail("%s: invalid non-command or non-option argument(s), use the "
          "'-h'/'--help' option to display the help message\n", progname);
 
-
   /* TODO: add error check */
   monitor_fd = spacemouse_monitor_open();
 
@@ -55,7 +54,6 @@ raw_command(char const *progname, options_t *options, int nargs, char **args)
              spacemouse_device_get_devnode(iter), strerror(-err));
     }
   }
-
 
   while (true) {
     fd_set fds;

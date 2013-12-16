@@ -48,7 +48,6 @@ static char const help_message[] = \
 "               MILLISECONDS  events' deviaton must exceed minimum deviation\n"
 "                             before printing an event to stdout";
 
-
 int
 parse_options(int argc, char **argv, options_t *options, cmd_t cmd)
 {
