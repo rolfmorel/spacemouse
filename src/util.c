@@ -31,7 +31,7 @@ fail(char const *format, ...)
     exit(EXIT_FAILURE);
 }
 
-int
+static int
 run_regex(char const *regex, char const *string, bool case_sensitive)
 {
   regex_t preg;
