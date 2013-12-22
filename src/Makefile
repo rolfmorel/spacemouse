@@ -1,3 +1,5 @@
+include ../VERSION.mk
+
 CC ?= gcc
 override CFLAGS += -std=c99 -Wall -Wno-missing-braces -D_POSIX_C_SOURCE=199309L
 
@@ -13,7 +15,7 @@ $(bin): $(objs) $(hdrs)
 	$(CC) $(CFLAGS) $(filter-out %.h, $+) -o $@ $(LDFLAGS) -lspacemouse
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -DVERSION=$(VERSION) -c $< -o $@
 
 .PHONY: clean
 clean:
