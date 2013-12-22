@@ -11,6 +11,8 @@
 
 #include "options.h"
 
+#define VERSION_RET 128
+
 static char const help_message[] = \
 "Usage: spm [OPTIONS]\n"
 "       spm <COMMAND> [OPTIONS]\n"
@@ -34,6 +36,7 @@ static char const help_message[] = \
 "                             product string must match\n"
 "  -i, --ignore-case          case insensitive regex\n"
 "  -h, --help                 display this help\n"
+"      --version              display version information\n"
 "\n"
 "Additional options for event command:\n"
 "  -g, --grab                 grab matched/all devices\n"
@@ -67,6 +70,7 @@ parse_options(int argc, char **argv, options_t *options, cmd_t cmd)
     { "product", required_argument, NULL, 'P' },
     { "ignore-case", no_argument, NULL, 'i' },
     { "help", no_argument, NULL, 'h' },
+    { "version", no_argument, NULL, VERSION_RET },
     { 0, 0, 0, 0 }
   };
 
@@ -127,6 +131,12 @@ parse_options(int argc, char **argv, options_t *options, cmd_t cmd)
         puts(help_message);
       case '?':
         exit(EXIT_FAILURE);
+        break;
+
+      case VERSION_RET:
+        puts("spm version " STR(VERSION));
+
+        exit(EXIT_SUCCESS);
         break;
     }
   }
