@@ -142,7 +142,7 @@ parse_options(int argc, char **argv, options_t *options, cmd_t cmd)
   }
 
   if (options->events != 0 && options->milliseconds != 0)
-    fail("%s: options '-n'/--events' and '-m'/--milliseconds' are mutually "
+    fail("%s: options '-n'/'--events' and '-m'/'--milliseconds' are mutually "
          "exclusive\n", argv[0]);
 
   /* return number of arguments consumed */
