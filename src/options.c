@@ -60,7 +60,7 @@ parse_options(int argc, char **argv, options_t *options, cmd_t cmd)
   char *optstring = cmd == EVENT_CMD ? "D:M:P:ihgd:n:m:" : "D:M:P:ih";
   struct option longopts[] = {
     /* event command specific options */
-    { "grab", no_argument, NULL, 'g'},
+    { "grab", no_argument, NULL, 'g' },
     { "deviation", required_argument, NULL, 'd' },
     { "events", required_argument, NULL, 'n' },
     { "milliseconds", required_argument, NULL, 'm' },
