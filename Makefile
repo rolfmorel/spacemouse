@@ -1,3 +1,5 @@
+include VERSION.mk
+
 PREFIX ?= /usr/local
 
 bin = spm
