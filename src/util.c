@@ -32,10 +32,10 @@ fail(char const *format, ...)
 }
 
 static int
-run_regex(char const *regex, char const *string, bool case_sensitive)
+run_regex(char const *regex, char const *string, bool ignore_case)
 {
   regex_t preg;
-  int ret, cflags = REG_EXTENDED | REG_NOSUB | case_sensitive ? REG_ICASE : 0;
+  int ret, cflags = REG_EXTENDED | REG_NOSUB | (ignore_case ? REG_ICASE : 0);
 
   if (regcomp(&preg, regex, cflags) != 0)
     return -1;
