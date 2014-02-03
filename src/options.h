@@ -1,11 +1,15 @@
 #ifndef _OPTIONS_HDR_
 #define _OPTIONS_HDR_
 
+typedef struct match {
+  bool ignore_case;
+
+  char const *device, *manufacturer, *product;
+} match_t;
+
 typedef struct
 {
-  bool re_ignore_case;
-
-  char const *dev_re, *man_re, *pro_re;
+  match_t match;
 
   /* event command specific options */
   bool grab;
@@ -17,10 +21,7 @@ typedef struct
 
 #include "commands.h"
 
-#define init_options(options) (options).re_ignore_case = false; \
-                               (options).dev_re = NULL; \
-                               (options).man_re = NULL; \
-                               (options).pro_re = NULL; \
+#define init_options(options) (options).match = (match_t){ false, 0 }; \
                                /* event command specific options */ \
                                (options).grab = false; \
                                (options).deviation = 0; \

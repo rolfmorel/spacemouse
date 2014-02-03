@@ -81,8 +81,7 @@ led_command(char const *progname, options_t *options, int nargs, char **args)
   }
 
   spacemouse_device_list_foreach(iter, head) {
-    int match = match_device(iter, options->dev_re, options->man_re,
-                             options->pro_re, options->re_ignore_case);
+    int match = match_device(iter, &options->match);
 
     if (match == -1) {
       fail("%s: failed to use regex, please use valid ERE\n", progname);

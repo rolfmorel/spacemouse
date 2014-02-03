@@ -3,6 +3,8 @@
 
 #include <libspacemouse.h>
 
+#include "options.h"
+
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
 
@@ -20,7 +22,6 @@ void
 fail(char const *format, ...);
 
 int
-match_device(struct spacemouse *mouse, char const *dev_re, char const *man_re,
-             char const *pro_re, bool case_sensitive);
+match_device(struct spacemouse *mouse, struct match const *match_opts);
 
 #endif /* #ifndef _UTIL_H_ */

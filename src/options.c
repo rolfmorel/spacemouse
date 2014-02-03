@@ -84,19 +84,19 @@ parse_options(int argc, char **argv, options_t *options, cmd_t cmd)
     int tmp;
     switch (c) {
       case 'D':
-        options->dev_re = optarg;
+        options->match.device = optarg;
         break;
 
       case 'M':
-        options->man_re = optarg;
+        options->match.manufacturer = optarg;
         break;
 
       case 'P':
-        options->pro_re = optarg;
+        options->match.product = optarg;
         break;
 
       case 'i':
-        options->re_ignore_case = true;
+        options->match.ignore_case = true;
         break;
 
       case 'g':

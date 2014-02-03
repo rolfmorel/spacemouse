@@ -35,8 +35,7 @@ raw_command(char const *progname, options_t *options, int nargs, char **args)
     printf("No devices connected.\n");
 
   spacemouse_device_list_foreach(iter, head) {
-    int match = match_device(iter, options->dev_re, options->man_re,
-                             options->pro_re, options->re_ignore_case);
+    int match = match_device(iter, &options->match);
 
     if (match == -1) {
       fail("%s: failed to use regex, please use valid ERE\n", progname);
@@ -84,8 +83,7 @@ raw_command(char const *progname, options_t *options, int nargs, char **args)
 
       int action = spacemouse_monitor(&mon_mouse);
 
-      int match = match_device(mon_mouse, options->dev_re, options->man_re,
-                               options->pro_re, options->re_ignore_case);
+      int match = match_device(mon_mouse, &options->match);
 
       if (match) {
         if (action == SPACEMOUSE_ACTION_ADD) {

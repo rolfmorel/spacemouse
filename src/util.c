@@ -48,18 +48,19 @@ run_regex(char const *regex, char const *string, bool ignore_case)
 }
 
 int
-match_device(struct spacemouse *mouse, char const *dev_re, char const *man_re,
-             char const *pro_re, bool case_sensitive)
+match_device(struct spacemouse *mouse, match_t const *match_opts)
 {
   int match = 0;
-  char const *strs[] = { dev_re, man_re, pro_re };
+  char const *re_strs[] = { match_opts->device, match_opts->manufacturer,
+                            match_opts->product };
   char const *members[] = { spacemouse_device_get_devnode(mouse),
                             spacemouse_device_get_manufacturer(mouse),
                             spacemouse_device_get_product(mouse) };
 
   for (size_t idx = 0; idx < 3; idx++) {
-    if (strs[idx] != NULL) {
-      int regex_success = run_regex(strs[idx], members[idx], case_sensitive);
+    if (re_strs[idx] != NULL) {
+      int regex_success = run_regex(re_strs[idx], members[idx],
+                                    match_opts->ignore_case);
       if (regex_success == -1) {
         return -1;
       } else if (regex_success == 1)
