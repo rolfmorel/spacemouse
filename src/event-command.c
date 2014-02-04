@@ -16,11 +16,15 @@
 int
 event_command(char const *progname, options_t *options, int nargs, char **args)
 {
-  struct axis_event {
-    unsigned int pos;
-    unsigned int neg;
-    char const * pos_str;
-    char const * neg_str;
+  struct {
+    char const *pos, *neg;
+  } axis_str[] = {
+    { "right", "left" },
+    { "back", "forward" },
+    { "down", "up" },
+    { "pitch back", "pitch forward" },
+    { "roll left", "roll right" },
+    { "yaw right", "yaw left" },
   };
 
   if (nargs)
@@ -31,24 +35,6 @@ event_command(char const *progname, options_t *options, int nargs, char **args)
     options->deviation = MIN_DEVIATION;
   if (options->events == 0 && options->milliseconds == 0)
     options->events = N_EVENTS;
-
-#ifndef AXIS_MAP_SPACENAVD
-  struct axis_event axis_map[] = { { 0, 0, "right", "left" },
-                                   { 0, 0, "back", "forward" },
-                                   { 0, 0, "down", "up" },
-                                   { 0, 0, "pitch back", "pitch forward" },
-                                   { 0, 0, "roll left", "roll right" },
-                                   { 0, 0, "yaw right", "yaw left" },
-                                  };
-#else
-  struct axis_event axis_map[] = { { 0, 0, "right", "left" },
-                                   { 0, 0, "up", "down" },
-                                   { 0, 0, "forward", "back" },
-                                   { 0, 0, "pitch back", "pitch forward" },
-                                   { 0, 0, "yaw left", "yaw right" },
-                                   { 0, 0, "roll right", "roll left" },
-                                  };
-#endif
 
   /* TODO: error check */
   int monitor_fd = spacemouse_monitor_open();
@@ -70,6 +56,13 @@ event_command(char const *progname, options_t *options, int nargs, char **args)
       if (match == -1) {
         fail("%s: failed to use regex, please use valid ERE\n", progname);
       } else if (match) {
+        int *axis_array = calloc(sizeof(int), 6);
+
+        if (axis_array == NULL)
+          fail("%s: failed to allocate memory: %s\n", progname,
+               strerror(-err));
+        spacemouse_device_set_data(iter, axis_array);
+
         if ((err = spacemouse_device_open(iter)) < 0)
           fail("%s: failed to open device '%s': %s\n", progname,
                spacemouse_device_get_devnode(iter), strerror(-err));
@@ -136,6 +129,13 @@ event_command(char const *progname, options_t *options, int nargs, char **args)
           int match = match_device(mon_mouse, &options->match);
 
           if (match) {
+            int *axis_array = calloc(sizeof(int), 6);
+
+            if (axis_array == NULL)
+                fail("%s: failed to allocate memory: %s\n", progname,
+                     strerror(-err));
+            spacemouse_device_set_data(mon_mouse, axis_array);
+
             if ((err = spacemouse_device_open(mon_mouse)) < 0)
               fail("%s: failed to open device '%s': %s\n", progname,
                    spacemouse_device_get_devnode(iter), strerror(-err));
@@ -152,10 +152,15 @@ event_command(char const *progname, options_t *options, int nargs, char **args)
           }
         } else if (action == SPACEMOUSE_ACTION_REMOVE) {
           if (spacemouse_device_get_fd(mon_mouse) > -1) {
+            int *axis_array = spacemouse_device_get_data(mon_mouse);
+
             printf("device: %s %s %s disconnect\n",
                    spacemouse_device_get_devnode(mon_mouse),
                    spacemouse_device_get_manufacturer(mon_mouse),
                    spacemouse_device_get_product(mon_mouse));
+
+            if (axis_array != NULL)
+              free(axis_array);
 
             if (options->grab)
               spacemouse_device_set_grab(mon_mouse, 0);
@@ -176,36 +181,45 @@ event_command(char const *progname, options_t *options, int nargs, char **args)
               spacemouse_device_close(iter);
             } else if (status == SPACEMOUSE_READ_SUCCESS) {
               if (mouse_event.type == SPACEMOUSE_EVENT_MOTION) {
-                int *axis_arr = &mouse_event.motion.x;
+                int *axis_array = &mouse_event.motion.x;
+                int *axis_cond_array = spacemouse_device_get_data(iter);
 
-                for (int i = 0; i < 6; i++) {
-                  unsigned int *axis_pol = NULL;
-                  char const *axis_str = NULL;
-
-                  if (axis_arr[i] > options->deviation) {
-                    axis_pol = &axis_map[i].pos;
-                    axis_str = axis_map[i].pos_str;
-                  } else
-                    axis_map[i].pos = 0;
-
-                  if (axis_arr[i] < (-1 * options->deviation)) {
-                    axis_pol = &axis_map[i].neg;
-                    axis_str = axis_map[i].neg_str;
-                  } else
-                    axis_map[i].neg = 0;
-
-                  if (axis_pol != NULL) {
+                for (int idx = 0; idx < 6; idx++) {
+                  if (axis_array[idx] > options->deviation &&
+                      axis_cond_array[idx] >= 0) {
                     if (options->milliseconds != 0) {
-                      *axis_pol += mouse_event.motion.period;
-                      if (*axis_pol > options->milliseconds) {
-                        *axis_pol = *axis_pol % options->milliseconds;
-                        printf("motion: %s\n", axis_str);
+                      axis_cond_array[idx] += mouse_event.motion.period;
+
+                      if (axis_cond_array[idx] > options->milliseconds) {
+                        axis_cond_array[idx] %= options->milliseconds;
+
+                        printf("motion: %s\n", axis_str[idx].pos);
                       }
                     } else {
-                      *axis_pol += 1;
-                      if ((*axis_pol % options->events) == 0)
-                        printf("motion: %s\n", axis_str);
+                      axis_cond_array[idx] += 1;
+
+                      if (axis_cond_array[idx] % options->events == 0)
+                        printf("motion: %s\n", axis_str[idx].pos);
                     }
+                  } else if (axis_array[idx] < -1 * options->deviation &&
+                             axis_cond_array[idx] <= 0) {
+                    if (options->milliseconds != 0) {
+                      axis_cond_array[idx] -= mouse_event.motion.period;
+
+                      if (axis_cond_array[idx] < -1 * options->milliseconds) {
+                        axis_cond_array[idx] %= options->milliseconds;
+                        axis_cond_array[idx] *= -1;
+
+                        printf("motion: %s\n", axis_str[idx].neg);
+                      }
+                    } else {
+                      axis_cond_array[idx] -= 1;
+
+                      if (axis_cond_array[idx] % options->events == 0)
+                        printf("motion: %s\n", axis_str[idx].neg);
+                    }
+                  } else {
+                    axis_cond_array[idx] = 0;
                   }
                 }
               } else if (mouse_event.type == SPACEMOUSE_EVENT_BUTTON) {
