@@ -71,8 +71,8 @@ int
 led_command(char const *progname, options_t *options, int nargs, char **args)
 {
   action_t action = parse_arguments(progname, nargs, args);
-
   struct spacemouse *head, *iter;
+  int ret = (action == LED_NONE) ? EXIT_SUCCESS : EXIT_FAILURE;
   int err = spacemouse_device_list(&head, 1);
 
   if (err) {
@@ -119,11 +119,13 @@ led_command(char const *progname, options_t *options, int nargs, char **args)
           printf("%s: switched %s\n", spacemouse_device_get_devnode(iter),
                  new_state ? "on": "off");
         }
+
+        ret = EXIT_SUCCESS;
       }
 
       spacemouse_device_close(iter);
     }
   }
 
-  return EXIT_SUCCESS;
+  return ret;
 }
