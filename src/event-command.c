@@ -104,7 +104,8 @@ event_command(char const *progname, options_t *options, int nargs, char **args)
     }
 
     struct pollfd fds[nfds];
-    fds[fds_idx++].fd = STDOUT_FILENO; /* no .events, just receive errors */
+    fds[fds_idx].fd = STDOUT_FILENO;
+    fds[fds_idx++].events = 0; /* no .events, just receive errors */
 
     fds[fds_idx].fd = monitor_fd;
     fds[fds_idx++].events = POLLIN;
