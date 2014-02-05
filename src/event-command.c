@@ -5,6 +5,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <poll.h>
+#include <errno.h>
 
 #include <libspacemouse.h>
 
@@ -12,6 +13,33 @@
 #include "util.h"
 
 #include "commands.h"
+
+static bool
+match_device_init(struct spacemouse *mouse, match_t const *match_opts,
+                  bool grab_opt, char const *progname)
+{
+  int err, match = match_device(mouse, match_opts);
+
+  if (match == -1) {
+    fail("%s: failed to use regex, please use valid ERE\n", progname);
+  } else if (match) {
+    int *axis_array = calloc(sizeof(int), 6);
+
+    if (axis_array == NULL)
+        fail("%s: failed to allocate memory: %s\n", progname, strerror(errno));
+    spacemouse_device_set_data(mouse, axis_array);
+
+    if ((err = spacemouse_device_open(mouse)) < 0)
+      fail("%s: failed to open device '%s': %s\n", progname,
+           spacemouse_device_get_devnode(mouse), strerror(-err));
+
+    if (grab_opt && (err = spacemouse_device_set_grab(mouse, 1)) < 0)
+      fail("%s: failed to grab device '%s': %s\n", progname,
+           spacemouse_device_get_devnode(mouse), strerror(-err));
+  }
+
+  return match;
+}
 
 int
 event_command(char const *progname, options_t *options, int nargs, char **args)
@@ -41,7 +69,6 @@ event_command(char const *progname, options_t *options, int nargs, char **args)
 
   {
     struct spacemouse *head, *iter;
-
     int err = spacemouse_device_list(&head, 1);
 
     if (err) {
@@ -50,28 +77,8 @@ event_command(char const *progname, options_t *options, int nargs, char **args)
            err);
     }
 
-    spacemouse_device_list_foreach(iter, head) {
-      int match = match_device(iter, &options->match);
-
-      if (match == -1) {
-        fail("%s: failed to use regex, please use valid ERE\n", progname);
-      } else if (match) {
-        int *axis_array = calloc(sizeof(int), 6);
-
-        if (axis_array == NULL)
-          fail("%s: failed to allocate memory: %s\n", progname,
-               strerror(-err));
-        spacemouse_device_set_data(iter, axis_array);
-
-        if ((err = spacemouse_device_open(iter)) < 0)
-          fail("%s: failed to open device '%s': %s\n", progname,
-               spacemouse_device_get_devnode(iter), strerror(-err));
-
-        if (options->grab && (err = spacemouse_device_set_grab(iter, 1)) < 0)
-          fail("%s: failed to grab device '%s': %s\n", progname,
-               spacemouse_device_get_devnode(iter), strerror(-err));
-      }
-    }
+    spacemouse_device_list_foreach(iter, head)
+      match_device_init(iter, &options->match, options->grab, progname);
   }
 
   /* If piped to another program, that program will probably want to parse
@@ -122,51 +129,31 @@ event_command(char const *progname, options_t *options, int nargs, char **args)
         exit(EX_IOERR);
       } else if (fds[fds_idx].fd == monitor_fd) {
         struct spacemouse *mon_mouse;
-
         int action = spacemouse_monitor(&mon_mouse);
 
-        if (action == SPACEMOUSE_ACTION_ADD) {
-          int match = match_device(mon_mouse, &options->match);
+        if (action == SPACEMOUSE_ACTION_ADD &&
+            match_device_init(mon_mouse, &options->match, options->grab,
+                              progname)) {
+          printf("device: %s %s %s connect\n",
+                 spacemouse_device_get_devnode(mon_mouse),
+                 spacemouse_device_get_manufacturer(mon_mouse),
+                 spacemouse_device_get_product(mon_mouse));
+        } else if (action == SPACEMOUSE_ACTION_REMOVE &&
+                   spacemouse_device_get_fd(mon_mouse) > -1) {
+          int *axis_array = spacemouse_device_get_data(mon_mouse);
 
-          if (match) {
-            int *axis_array = calloc(sizeof(int), 6);
+          printf("device: %s %s %s disconnect\n",
+                 spacemouse_device_get_devnode(mon_mouse),
+                 spacemouse_device_get_manufacturer(mon_mouse),
+                 spacemouse_device_get_product(mon_mouse));
 
-            if (axis_array == NULL)
-                fail("%s: failed to allocate memory: %s\n", progname,
-                     strerror(-err));
-            spacemouse_device_set_data(mon_mouse, axis_array);
+          if (axis_array != NULL)
+            free(axis_array);
 
-            if ((err = spacemouse_device_open(mon_mouse)) < 0)
-              fail("%s: failed to open device '%s': %s\n", progname,
-                   spacemouse_device_get_devnode(iter), strerror(-err));
+          if (options->grab)
+            spacemouse_device_set_grab(mon_mouse, 0);
 
-            if (options->grab &&
-                (err = spacemouse_device_set_grab(mon_mouse, 1)) < 0)
-              fail("%s: failed to grab device '%s': %s\n", progname,
-                   spacemouse_device_get_devnode(mon_mouse), strerror(-err));
-
-            printf("device: %s %s %s connect\n",
-                   spacemouse_device_get_devnode(mon_mouse),
-                   spacemouse_device_get_manufacturer(mon_mouse),
-                   spacemouse_device_get_product(mon_mouse));
-          }
-        } else if (action == SPACEMOUSE_ACTION_REMOVE) {
-          if (spacemouse_device_get_fd(mon_mouse) > -1) {
-            int *axis_array = spacemouse_device_get_data(mon_mouse);
-
-            printf("device: %s %s %s disconnect\n",
-                   spacemouse_device_get_devnode(mon_mouse),
-                   spacemouse_device_get_manufacturer(mon_mouse),
-                   spacemouse_device_get_product(mon_mouse));
-
-            if (axis_array != NULL)
-              free(axis_array);
-
-            if (options->grab)
-              spacemouse_device_set_grab(mon_mouse, 0);
-
-            spacemouse_device_close(mon_mouse);
-          }
+          spacemouse_device_close(mon_mouse);
         }
 
         selected_fds--;
